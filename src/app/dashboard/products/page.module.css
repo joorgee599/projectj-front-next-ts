@@ -1,0 +1,276 @@
+.productsPage {
+  max-width: 100%;
+}
+
+.pageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.headerLeft h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--foreground);
+  margin-bottom: 0.5rem;
+}
+
+.headerLeft p {
+  color: var(--secondary);
+}
+
+.addButton {
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, var(--primary), #7c3aed);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.addButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+}
+
+.productsCard {
+  background: white;
+  border-radius: 12px;
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+}
+
+.tableContainer {
+  overflow-x: auto;
+}
+
+.productsTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.productsTable thead {
+  background: var(--background);
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.productsTable th {
+  padding: 1rem;
+  text-align: left;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.productsTable td {
+  padding: 1rem;
+  border-bottom: 1px solid #f1f5f9;
+  color: var(--foreground);
+}
+
+.productsTable tbody tr {
+  transition: background 0.2s ease;
+}
+
+.productsTable tbody tr:hover {
+  background: var(--background);
+}
+
+.productImage {
+  width: 50px;
+  height: 50px;
+  border-radius: 8px;
+  object-fit: cover;
+  background: var(--background);
+}
+
+.productName {
+  font-weight: 600;
+  color: var(--foreground);
+  margin-bottom: 0.25rem;
+}
+
+.productCode {
+  font-size: 0.85rem;
+  color: var(--secondary);
+}
+
+.price {
+  font-weight: 600;
+  color: #10b981;
+  font-size: 1.05rem;
+}
+
+.stock {
+  padding: 0.4rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.stock.inStock {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.stock.lowStock {
+  background: #fed7aa;
+  color: #92400e;
+}
+
+.stock.outOfStock {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.statusCell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.status {
+  padding: 0.4rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.status.active {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.status.inactive {
+  background: #e5e7eb;
+  color: #4b5563;
+}
+
+.statusToggle {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 24px;
+}
+
+.statusToggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #cbd5e1;
+  transition: 0.3s;
+  border-radius: 24px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.3s;
+  border-radius: 50%;
+}
+
+.statusToggle input:checked + .slider {
+  background-color: #10b981;
+}
+
+.statusToggle input:checked + .slider:before {
+  transform: translateX(24px);
+}
+
+.statusToggle input:disabled + .slider {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.actionButton {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  font-size: 0.85rem;
+}
+
+.editButton {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.editButton:hover {
+  background: #bfdbfe;
+}
+
+.deleteButton {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.deleteButton:hover {
+  background: #fecaca;
+}
+
+.emptyState {
+  padding: 4rem 2rem;
+  text-align: center;
+  color: var(--secondary);
+}
+
+.emptyState h3 {
+  font-size: 1.25rem;
+  color: var(--foreground);
+  margin-bottom: 0.5rem;
+}
+
+.loading {
+  padding: 4rem 2rem;
+  text-align: center;
+  color: var(--secondary);
+}
+
+@media (max-width: 768px) {
+  .pageHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .addButton {
+    width: 100%;
+    justify-content: center;
+  }
+}

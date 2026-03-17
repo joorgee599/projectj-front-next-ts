@@ -1,0 +1,370 @@
+.sidebar {
+  width: 260px;
+  height: 100vh;
+  background: #1e293b;
+  position: fixed;
+  left: 0;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s ease;
+  z-index: 100;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar.collapsed {
+  width: 80px;
+}
+
+.sidebarHeader {
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--primary), #7c3aed);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.brandName {
+  color: white;
+  font-size: 1.25rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.sidebar.collapsed .brandName {
+  display: none;
+}
+
+.sidebarNav {
+  flex: 1;
+  padding: 1rem 0;
+  overflow-y: auto;
+}
+
+.sidebarNav::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebarNav::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebarNav::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+}
+
+.navSection {
+  margin-bottom: 1.5rem;
+}
+
+.navTitle {
+  padding: 0.5rem 1.5rem;
+  color: #94a3b8;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.sidebar.collapsed .navTitle {
+  display: none;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1.5rem;
+  color: #cbd5e1;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  position: relative;
+  font-size: 0.95rem;
+}
+
+.navItem:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: white;
+}
+
+.navItem.active {
+  background: rgba(79, 70, 229, 0.2);
+  color: white;
+  border-left: 3px solid var(--primary);
+}
+
+.navItem.active::before {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 100%;
+  background: var(--primary);
+}
+
+/* Indicator for items with sub-items when collapsed */
+.sidebar.collapsed .navItem.hasSubItems::after {
+  content: '';
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 6px;
+  background: var(--primary);
+  border-radius: 50%;
+}
+
+.navIcon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 1.25rem;
+}
+
+.navText {
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.sidebar.collapsed .navText {
+  display: none;
+}
+
+.badge {
+  margin-left: auto;
+  background: var(--primary);
+  color: white;
+  font-size: 0.7rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+.sidebar.collapsed .badge {
+  display: none;
+}
+
+.sidebarFooter {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.userCard {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.userCard:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.userAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #10b981, #34d399);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.userInfo {
+  flex: 1;
+  overflow: hidden;
+}
+
+.sidebar.collapsed .userInfo {
+  display: none;
+}
+
+.userName {
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.userRole {
+  color: #94a3b8;
+  font-size: 0.75rem;
+}
+
+.toggleButton {
+  position: absolute;
+  right: -12px;
+  top: 30px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--primary);
+  border: 2px solid white;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.75rem;
+}
+
+.toggleButton:hover {
+  background: var(--primary-hover);
+  transform: scale(1.1);
+}
+
+.expandIcon {
+  margin-left: auto;
+  font-size: 0.7rem;
+  color: #94a3b8;
+  transition: transform 0.2s ease;
+}
+
+.sidebar.collapsed .expandIcon {
+  display: none;
+}
+
+.subItems {
+  display: flex;
+  flex-direction: column;
+  background: rgba(0, 0, 0, 0.2);
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.subItem {
+  padding-left: 4rem !important;
+  font-size: 0.9rem;
+}
+
+.subItem .navIcon {
+  font-size: 1rem;
+}
+
+.sidebar.collapsed .subItems {
+  display: none;
+}
+
+.navItemWrapper {
+  position: relative;
+}
+
+/* Popup menu for collapsed sidebar */
+.popupMenu {
+  position: absolute;
+  left: 100%;
+  top: 0;
+  min-width: 200px;
+  background: #1e293b;
+  border-radius: 8px;
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
+  padding: 0.5rem 0;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-10px);
+  transition: all 0.2s ease;
+  z-index: 1000;
+  margin-left: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.navItemWrapper:hover .popupMenu {
+  opacity: 1;
+  pointer-events: all;
+  transform: translateX(0);
+}
+
+.popupHeader {
+  padding: 0.75rem 1rem;
+  color: white;
+  font-weight: 600;
+  font-size: 0.9rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 0.25rem;
+}
+
+.popupItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  color: #cbd5e1;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.popupItem:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: white;
+}
+
+.popupItem.active {
+  background: rgba(79, 70, 229, 0.2);
+  color: white;
+}
+
+.popupItem .navIcon {
+  font-size: 1.1rem;
+}
+
+.sidebar:not(.collapsed) .popupMenu {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  .sidebar {
+    transform: translateX(-100%);
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .toggleButton {
+    display: none;
+  }
+}
