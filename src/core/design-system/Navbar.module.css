@@ -310,3 +310,48 @@
     height: 36px;
   }
 }
+
+/* Dark mode styles */
+:global(.dark) .navbar {
+  background: rgba(15, 23, 42, 0.95);
+  border-bottom-color: #334155;
+}
+
+:global(.dark) .searchInput {
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+:global(.dark) .searchInput:focus {
+  background: #1e293b;
+  border-color: #6366f1;
+}
+
+:global(.dark) .userButton {
+  border-color: #334155;
+}
+
+:global(.dark) .userButton:hover {
+  background: #1e293b;
+}
+
+:global(.dark) .userDropdown {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+:global(.dark) .dropdownItem.logout:hover {
+  background: #3f1d1d;
+}
+
+:global(.dark) .divider {
+  background: #334155;
+}
+
+:global(.dark) .notificationBadge {
+  border-color: #0f172a;
+}
+
+:global(.dark) .dropdownDivider {
+  background: #334155;
+}

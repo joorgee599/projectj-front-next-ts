@@ -20,6 +20,7 @@
 .primary:hover {
   background: var(--primary-hover);
   transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
 }
 
 .secondary {
@@ -27,15 +28,21 @@
   color: white;
 }
 
+.secondary:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
 .glass {
   background: var(--glass);
   backdrop-filter: blur(8px);
   border: 1px solid var(--glass-border);
-  color: var(--foreground);
+  color: var(--text-primary);
 }
 
 .glass:hover {
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--hover-bg);
+  border-color: var(--border-color);
 }
 
 .button:disabled {
@@ -55,4 +62,9 @@
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+/* Dark mode-specific adjustments if needed */
+:global(.dark) .primary:hover {
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
 }

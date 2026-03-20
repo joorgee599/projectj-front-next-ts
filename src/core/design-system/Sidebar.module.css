@@ -368,3 +368,64 @@
     display: none;
   }
 }
+
+/* Dark mode overrides - make sidebar lighter in dark mode */
+:global(.dark) .sidebar {
+  background: var(--sidebar-bg);
+  border-right: 1px solid #1e293b;
+}
+
+:global(.dark) .sidebarHeader {
+  border-bottom-color: #1e293b;
+}
+
+:global(.dark) .navTitle {
+  color: #64748b;
+}
+
+:global(.dark) .navItem {
+  color: var(--sidebar-text);
+}
+
+:global(.dark) .navItem:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+:global(.dark) .navItem.active {
+  background: rgba(99, 102, 241, 0.15);
+}
+
+:global(.dark) .userCard {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+:global(.dark) .userCard:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+:global(.dark) .userRole {
+  color: #64748b;
+}
+
+:global(.dark) .popupMenu {
+  background: var(--card-bg);
+  border-color: var(--border-color);
+}
+
+:global(.dark) .popupHeader {
+  border-bottom-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+:global(.dark) .popupItem {
+  color: var(--text-secondary);
+}
+
+:global(.dark) .popupItem:hover {
+  background: var(--hover-bg);
+  color: var(--text-primary);
+}
+
+:global(.dark) .toggleButton {
+  border-color: var(--sidebar-bg);
+}

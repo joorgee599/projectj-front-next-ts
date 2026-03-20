@@ -2,6 +2,19 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { 
+  Search, 
+  Menu, 
+  PlusCircle, 
+  Bell, 
+  MessageSquare, 
+  User, 
+  LogOut,
+  ChevronDown
+} from 'lucide-react';
+import { ThemeToggle } from './ThemeToggle';
+import { LanguageSelector } from './LanguageSelector';
 import styles from './Navbar.module.css';
 
 interface NavbarProps {
@@ -11,11 +24,14 @@ interface NavbarProps {
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ 
-  userName = 'Usuario',
+  userName,
   onLogout,
   onMenuToggle 
 }) => {
   const router = useRouter();
+  const t = useTranslations('navbar');
+  const tCommon = useTranslations('common');
+  const finalUserName = userName || tCommon('user');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -48,34 +64,40 @@ export const Navbar: React.FC<NavbarProps> = ({
         onClick={onMenuToggle}
         aria-label="Toggle menu"
       >
-        ☰
+        <Menu size={24} />
       </button>
 
       <div className={styles.searchWrapper}>
-        <span className={styles.searchIcon}>🔍</span>
+        <Search className={styles.searchIcon} size={18} />
         <input
           type="text"
-          placeholder="Buscar productos, usuarios, órdenes..."
+          placeholder={t('search')}
           className={styles.searchInput}
         />
       </div>
 
       <div className={styles.quickActions}>
         <button className={`${styles.quickActionBtn} ${styles.primary}`}>
-          <span>➕</span>
-          <span>Nuevo</span>
+          <PlusCircle size={18} />
+          <span>{t('new')}</span>
         </button>
       </div>
 
       <div className={styles.navActions}>
-        <button className={styles.actionButton} aria-label="Notificaciones">
-          🔔
+        <button className={styles.actionButton} aria-label={t('notifications')}>
+          <Bell size={20} />
           <span className={styles.notificationBadge}></span>
         </button>
 
-        <button className={styles.actionButton} aria-label="Mensajes">
-          💬
+        <button className={styles.actionButton} aria-label={t('messages')}>
+          <MessageSquare size={20} />
         </button>
+
+        <div className={styles.divider}></div>
+
+        <ThemeToggle />
+        
+        <LanguageSelector />
 
         <div className={styles.divider}></div>
 
@@ -85,13 +107,13 @@ export const Navbar: React.FC<NavbarProps> = ({
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
           >
             <div className={styles.userAvatar}>
-              {userName.charAt(0).toUpperCase()}
+              {finalUserName.charAt(0).toUpperCase()}
             </div>
             <div className={styles.userInfo}>
-              <div className={styles.userName}>{userName}</div>
-              <div className={styles.userStatus}>En línea</div>
+              <div className={styles.userName}>{finalUserName}</div>
+              <div className={styles.userStatus}>{t('online')}</div>
             </div>
-            <span className={styles.dropdownIcon}>▼</span>
+            <ChevronDown className={styles.dropdownIcon} size={16} />
           </button>
 
           {isDropdownOpen && (
@@ -100,8 +122,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                 className={styles.dropdownItem}
                 onClick={handleProfileClick}
               >
-                <span className={styles.dropdownItemIcon}>👤</span>
-                <span>Mi Perfil</span>
+                <User size={16} className={styles.dropdownItemIcon} />
+                <span>{t('profile')}</span>
               </button>
               
               <div className={styles.dropdownDivider}></div>
@@ -110,8 +132,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                 className={`${styles.dropdownItem} ${styles.logout}`}
                 onClick={handleLogoutClick}
               >
-                <span className={styles.dropdownItemIcon}>🚪</span>
-                <span>Cerrar Sesión</span>
+                <LogOut size={16} className={styles.dropdownItemIcon} />
+                <span>{t('logout')}</span>
               </button>
             </div>
           )}

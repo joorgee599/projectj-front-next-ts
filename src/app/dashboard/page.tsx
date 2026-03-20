@@ -1,17 +1,19 @@
 'use client';
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import { DashboardLayout } from '@/core/design-system/DashboardLayout';
 import { ChatWidget } from '@/modules/chat/components/ChatWidget';
 import styles from './page.module.css';
 
 export default function DashboardPage() {
+  const t = useTranslations('dashboard');
   return (
     <DashboardLayout>
       <div className={styles.dashboardContent}>
         <div className={styles.welcomeSection}>
-          <h1>¡Bienvenido de nuevo! 👋</h1>
-          <p>Aquí está un resumen de tu actividad</p>
+          <h1>👋 {t('welcome')}</h1>
+          <p>{t('subtitle')}</p>
         </div>
 
         <div className={styles.statsGrid}>
@@ -20,10 +22,10 @@ export default function DashboardPage() {
               <div className={`${styles.statIcon} ${styles.blue}`}>
                 📊
               </div>
-              <span className={styles.statTitle}>Total de Ventas</span>
+              <span className={styles.statTitle}>{t('totalSales')}</span>
             </div>
             <div className={styles.statValue}>$24,500</div>
-            <div className={styles.statChange}>+12.5% vs mes anterior</div>
+            <div className={styles.statChange}>+12.5% {t('vsPreviousMonth')}</div>
           </div>
 
           <div className={styles.statCard}>
@@ -31,10 +33,10 @@ export default function DashboardPage() {
               <div className={`${styles.statIcon} ${styles.green}`}>
                 👥
               </div>
-              <span className={styles.statTitle}>Usuarios Activos</span>
+              <span className={styles.statTitle}>{t('activeUsers')}</span>
             </div>
             <div className={styles.statValue}>1,248</div>
-            <div className={styles.statChange}>+8.2% vs mes anterior</div>
+            <div className={styles.statChange}>+8.2% {t('vsPreviousMonth')}</div>
           </div>
 
           <div className={styles.statCard}>
@@ -42,10 +44,10 @@ export default function DashboardPage() {
               <div className={`${styles.statIcon} ${styles.purple}`}>
                 📦
               </div>
-              <span className={styles.statTitle}>Productos</span>
+              <span className={styles.statTitle}>{t('products')}</span>
             </div>
             <div className={styles.statValue}>342</div>
-            <div className={styles.statChange}>+5 nuevos esta semana</div>
+            <div className={styles.statChange}>+5 {t('newThisWeek')}</div>
           </div>
 
           <div className={styles.statCard}>
@@ -53,10 +55,10 @@ export default function DashboardPage() {
               <div className={`${styles.statIcon} ${styles.orange}`}>
                 ⭐
               </div>
-              <span className={styles.statTitle}>Satisfacción</span>
+              <span className={styles.statTitle}>{t('satisfaction')}</span>
             </div>
             <div className={styles.statValue}>4.8/5</div>
-            <div className={styles.statChange}>+0.3 vs mes anterior</div>
+            <div className={styles.statChange}>+0.3 {t('vsPreviousMonth')}</div>
           </div>
         </div>
 

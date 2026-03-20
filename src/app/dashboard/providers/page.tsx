@@ -1,7 +1,16 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import Swal from 'sweetalert2';
+import { 
+  Truck, 
+  Plus, 
+  Pencil, 
+  Trash2, 
+  Calendar,
+  Mail
+} from 'lucide-react';
 import { DashboardLayout } from '@/core/design-system/DashboardLayout';
 import { ProviderModal } from '@/modules/providers/components/ProviderModal';
 import { providerService } from '@/modules/providers/services/provider.service';
@@ -9,6 +18,8 @@ import { Provider, ProviderRequest } from '@/modules/providers/types/provider.ty
 import styles from './page.module.css';
 
 export default function ProvidersPage() {
+  const t = useTranslations('providers');
+  const tCommon = useTranslations('common');
   const [providers, setProviders] = useState<Provider[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -27,8 +38,8 @@ export default function ProvidersPage() {
     } catch (error) {
       console.error('Error loading providers:', error);
       Swal.fire({
-        title: 'Error',
-        text: 'No se pudieron cargar los proveedores',
+        title: tCommon('error'),
+        text: t('errorLoading'),
         icon: 'error',
         confirmButtonColor: '#4f46e5'
       });
@@ -52,8 +63,8 @@ export default function ProvidersPage() {
       if (selectedProvider) {
         await providerService.update(selectedProvider.id, providerData);
         Swal.fire({
-          title: '¡Actualizado!',
-          text: 'El proveedor ha sido actualizado correctamente',
+          title: t('updated'),
+          text: t('updatedSuccess'),
           icon: 'success',
           confirmButtonColor: '#4f46e5',
           timer: 2000
@@ -61,19 +72,20 @@ export default function ProvidersPage() {
       } else {
         await providerService.create(providerData);
         Swal.fire({
-          title: '¡Creado!',
-          text: 'El proveedor ha sido creado correctamente',
+          title: t('created'),
+          text: t('createdSuccess'),
           icon: 'success',
           confirmButtonColor: '#4f46e5',
           timer: 2000
         });
       }
+      setIsModalOpen(false);
       await loadProviders();
     } catch (error) {
       console.error('Error saving provider:', error);
       Swal.fire({
-        title: 'Error',
-        text: 'No se pudo guardar el proveedor',
+        title: tCommon('error'),
+        text: t('errorSaving'),
         icon: 'error',
         confirmButtonColor: '#4f46e5'
       });
@@ -82,14 +94,14 @@ export default function ProvidersPage() {
 
   const handleDelete = async (id: number) => {
     const result = await Swal.fire({
-      title: '¿Estás seguro?',
-      text: 'Esta acción no se puede deshacer',
+      title: t('deleteConfirm'),
+      text: t('deleteText'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#ef4444',
       cancelButtonColor: '#6b7280',
-      confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar'
+      confirmButtonText: tCommon('yes'),
+      cancelButtonText: tCommon('cancel')
     });
 
     if (!result.isConfirmed) return;
@@ -99,8 +111,8 @@ export default function ProvidersPage() {
       setProviders(providers.filter(p => p.id !== id));
       
       Swal.fire({
-        title: '¡Eliminado!',
-        text: 'El proveedor ha sido eliminado correctamente',
+        title: t('deleted'),
+        text: t('deletedSuccess'),
         icon: 'success',
         confirmButtonColor: '#4f46e5',
         timer: 2000
@@ -108,8 +120,8 @@ export default function ProvidersPage() {
     } catch (error) {
       console.error('Error deleting provider:', error);
       Swal.fire({
-        title: 'Error',
-        text: 'No se pudo eliminar el proveedor',
+        title: tCommon('error'),
+        text: t('errorDeleting'),
         icon: 'error',
         confirmButtonColor: '#4f46e5'
       });
@@ -118,7 +130,7 @@ export default function ProvidersPage() {
 
   const handleStatusToggle = async (id: number, currentStatus: number) => {
     const newStatus = currentStatus === 1 ? 0 : 1;
-    const statusText = newStatus === 1 ? 'Activo' : 'Inactivo';
+    const statusText = newStatus === 1 ? t('activated') : t('deactivated');
     
     try {
       setUpdatingStatus(id);
@@ -129,8 +141,8 @@ export default function ProvidersPage() {
       ));
 
       Swal.fire({
-        title: '¡Estado actualizado!',
-        html: `El proveedor ahora está <strong>${statusText}</strong>`,
+        title: t('statusUpdated'),
+        html: `${t('provider')} <strong>${statusText}</strong>`,
         icon: 'success',
         confirmButtonColor: '#4f46e5',
         timer: 2000,
@@ -139,8 +151,8 @@ export default function ProvidersPage() {
     } catch (error) {
       console.error('Error updating status:', error);
       Swal.fire({
-        title: 'Error',
-        text: 'No se pudo actualizar el estado del proveedor',
+        title: tCommon('error'),
+        text: t('errorUpdating'),
         icon: 'error',
         confirmButtonColor: '#4f46e5'
       });
@@ -159,94 +171,96 @@ export default function ProvidersPage() {
 
   return (
     <DashboardLayout>
-      <div className={styles.container}>
-        <div className={styles.header}>
-          <div>
-            <h1 className={styles.title}>Gestión de Proveedores</h1>
-            <p className={styles.subtitle}>Administra los proveedores del sistema</p>
+      <div className={styles.providersPage}>
+        <div className={styles.pageHeader}>
+          <div className={styles.headerLeft}>
+            <h1><Truck size={28} className={styles.titleIcon} /> {t('title')}</h1>
+            <p>{t('subtitle')}</p>
           </div>
-          <button className={styles.createButton} onClick={handleCreate}>
-            + Nuevo Proveedor
+          <button className={styles.addButton} onClick={handleCreate}>
+            <Plus size={20} />
+            <span>{t('createNew')}</span>
           </button>
         </div>
 
-        {isLoading ? (
-          <div className={styles.loading}>Cargando proveedores...</div>
-        ) : providers.length === 0 ? (
-          <div className={styles.emptyState}>
-            <p>No hay proveedores registrados</p>
-            <button className={styles.createButton} onClick={handleCreate}>
-              Crear primer proveedor
-            </button>
-          </div>
-        ) : (
-          <div className={styles.tableContainer}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Nombre</th>
-                  <th>Contacto</th>
-                  <th>Email</th>
-                  <th>Teléfono</th>
-                  <th>Estado</th>
-                  <th>Fecha Creación</th>
-                  <th>Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {providers.map((provider) => (
-                  <tr key={provider.id}>
-                    <td>{provider.id}</td>
-                    <td className={styles.providerName}>{provider.name}</td>
-                    <td>{provider.contactName || '-'}</td>
-                    <td className={styles.email}>{provider.email}</td>
-                    <td>{provider.phone}</td>
-                    <td>
-                      <div className={styles.statusCell}>
-                        <label className={styles.statusToggle}>
-                          <input
-                            type="checkbox"
-                            checked={provider.status === 1}
-                            onChange={() => handleStatusToggle(provider.id, provider.status)}
-                            disabled={updatingStatus === provider.id}
-                          />
-                          <span className={styles.slider}></span>
-                        </label>
-                        <span
-                          className={`${styles.status} ${
-                            provider.status === 1 ? styles.active : styles.inactive
-                          }`}
-                        >
-                          {provider.status === 1 ? 'Activo' : 'Inactivo'}
-                        </span>
-                      </div>
-                    </td>
-                    <td className={styles.date}>{formatDate(provider.createdAt)}</td>
-                    <td>
-                      <div className={styles.actions}>
-                        <button
-                          className={`${styles.actionButton} ${styles.editButton}`}
-                          onClick={() => handleEdit(provider)}
-                          title="Editar"
-                        >
-                          ✏️
-                        </button>
-                        <button
-                          className={`${styles.actionButton} ${styles.deleteButton}`}
-                          onClick={() => handleDelete(provider.id)}
-                          title="Eliminar"
-                        >
-                          🗑️
-                        </button>
-                      </div>
-                    </td>
+        <div className={styles.providersCard}>
+          {isLoading ? (
+            <div className={styles.loading}>
+              <p>{tCommon('loading')}</p>
+            </div>
+          ) : providers.length === 0 ? (
+            <div className={styles.emptyState}>
+              <Truck size={48} style={{ opacity: 0.2, marginBottom: '1rem' }} />
+              <h3>{t('noData')}</h3>
+              <button className={styles.addButton} onClick={handleCreate} style={{ marginTop: '1rem', margin: '0 auto' }}>
+                <Plus size={18} /> {t('createFirst')}
+              </button>
+            </div>
+          ) : (
+            <div className={styles.tableContainer}>
+              <table className={styles.providersTable}>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>{t('name')}</th>
+                    <th><Mail size={16} /> {t('email')}</th>
+                    <th>{tCommon('status')}</th>
+                    <th><Calendar size={16} /> {t('createdAt')}</th>
+                    <th>{tCommon('actions')}</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+                </thead>
+                <tbody>
+                  {providers.map((provider) => (
+                    <tr key={provider.id}>
+                      <td>{provider.id}</td>
+                      <td className={styles.providerName}>{provider.name}</td>
+                      <td className={styles.email}>{provider.email}</td>
+                      <td>
+                        <div className={styles.statusCell}>
+                          <label className={styles.statusToggle}>
+                            <input
+                              type="checkbox"
+                              checked={provider.status === 1}
+                              onChange={() => handleStatusToggle(provider.id, provider.status)}
+                              disabled={updatingStatus === provider.id}
+                            />
+                            <span className={styles.slider}></span>
+                          </label>
+                          <span
+                            className={`${styles.status} ${
+                              provider.status === 1 ? styles.active : styles.inactive
+                            }`}
+                          >
+                            {provider.status === 1 ? tCommon('active') : tCommon('inactive')}
+                          </span>
+                        </div>
+                      </td>
+                      <td className={styles.date}>{formatDate(provider.createdAt)}</td>
+                      <td>
+                        <div className={styles.actions}>
+                          <button
+                            className={`${styles.actionButton} ${styles.editButton}`}
+                            onClick={() => handleEdit(provider)}
+                            title={tCommon('edit')}
+                          >
+                            <Pencil size={16} />
+                          </button>
+                          <button
+                            className={`${styles.actionButton} ${styles.deleteButton}`}
+                            onClick={() => handleDelete(provider.id)}
+                            title={tCommon('delete')}
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
 
         <ProviderModal
           isOpen={isModalOpen}

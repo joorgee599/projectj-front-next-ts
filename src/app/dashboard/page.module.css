@@ -231,3 +231,30 @@
     padding: 1.5rem;
   }
 }
+
+/* Dark mode styles */
+:global(.dark) .statCard {
+  background: #1e293b;
+}
+
+:global(.dark) .mainContent,
+:global(.dark) .sidebarContent {
+  background: #1e293b;
+}
+
+:global(.dark) .activityItem {
+  border-color: #334155;
+}
+
+:global(.dark) .activityIcon {
+  background: #0f172a;
+}
+
+:global(.dark) .quickAction {
+  background: #0f172a;
+}
+
+:global(.dark) .quickAction:hover {
+  background: #334155;
+  border-color: var(--primary);
+}

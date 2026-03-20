@@ -279,3 +279,23 @@
     height: 100px;
   }
 }
+
+/* Dark mode styles */
+:global(.dark) .profileCard,
+:global(.dark) .infoCard,
+:global(.dark) .statsCard,
+:global(.dark) .activityCard {
+  background: #1e293b;
+}
+
+:global(.dark) .avatarWrapper {
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+}
+
+:global(.dark) .infoItem {
+  border-color: #334155;
+}
+
+:global(.dark) .activityItem {
+  border-color: #334155;
+}

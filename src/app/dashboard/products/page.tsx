@@ -1,7 +1,19 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import Swal from 'sweetalert2';
+import { 
+  Package, 
+  Plus, 
+  Search, 
+  Pencil, 
+  Trash2, 
+  Image as ImageIcon,
+  Tag,
+  Factory,
+  BarChart2
+} from 'lucide-react';
 import { DashboardLayout } from '@/core/design-system/DashboardLayout';
 import { ProductModal } from '@/modules/products/components/ProductModal';
 import { productService } from '@/modules/products/services/product.service';
@@ -9,6 +21,8 @@ import { Product, ProductRequest } from '@/modules/products/types/product.types'
 import styles from './page.module.css';
 
 export default function ProductsPage() {
+  const t = useTranslations('products');
+  const tCommon = useTranslations('common');
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -26,6 +40,12 @@ export default function ProductsPage() {
       setProducts(data);
     } catch (error) {
       console.error('Error loading products:', error);
+      Swal.fire({
+        title: tCommon('error'),
+        text: t('errorLoading'),
+        icon: 'error',
+        confirmButtonColor: '#4f46e5'
+      });
     } finally {
       setIsLoading(false);
     }
@@ -42,26 +62,51 @@ export default function ProductsPage() {
   };
 
   const handleSubmit = async (productData: ProductRequest) => {
-    if (selectedProduct) {
-      // Actualizar
-      await productService.update(selectedProduct.id, productData);
-    } else {
-      // Crear
-      await productService.create(productData);
+    try {
+      if (selectedProduct) {
+        // Actualizar
+        await productService.update(selectedProduct.id, productData);
+        Swal.fire({
+          title: t('updated'),
+          text: t('updatedSuccess'),
+          icon: 'success',
+          confirmButtonColor: '#4f46e5',
+          timer: 2000
+        });
+      } else {
+        // Crear
+        await productService.create(productData);
+        Swal.fire({
+          title: t('created'),
+          text: t('createdSuccess'),
+          icon: 'success',
+          confirmButtonColor: '#4f46e5',
+          timer: 2000
+        });
+      }
+      await loadProducts();
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error('Error saving product:', error);
+      Swal.fire({
+        title: tCommon('error'),
+        text: t('errorSaving'),
+        icon: 'error',
+        confirmButtonColor: '#4f46e5'
+      });
     }
-    await loadProducts();
   };
 
   const handleDelete = async (id: number) => {
     const result = await Swal.fire({
-      title: '¿Estás seguro?',
-      text: 'Esta acción no se puede deshacer',
+      title: t('deleteConfirm'),
+      text: t('deleteText'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#ef4444',
       cancelButtonColor: '#6b7280',
-      confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar'
+      confirmButtonText: tCommon('yes'),
+      cancelButtonText: tCommon('cancel')
     });
 
     if (!result.isConfirmed) return;
@@ -71,8 +116,8 @@ export default function ProductsPage() {
       setProducts(products.filter(p => p.id !== id));
       
       Swal.fire({
-        title: '¡Eliminado!',
-        text: 'El producto ha sido eliminado correctamente',
+        title: t('deleted'),
+        text: t('deletedSuccess'),
         icon: 'success',
         confirmButtonColor: '#4f46e5',
         timer: 2000
@@ -80,8 +125,8 @@ export default function ProductsPage() {
     } catch (error) {
       console.error('Error deleting product:', error);
       Swal.fire({
-        title: 'Error',
-        text: 'No se pudo eliminar el producto',
+        title: tCommon('error'),
+        text: t('errorDeleting'),
         icon: 'error',
         confirmButtonColor: '#4f46e5'
       });
@@ -90,7 +135,7 @@ export default function ProductsPage() {
 
   const handleStatusToggle = async (id: number, currentStatus: number) => {
     const newStatus = currentStatus === 1 ? 0 : 1;
-    const statusText = newStatus === 1 ? 'Activo' : 'Inactivo';
+    const statusText = newStatus === 1 ? tCommon('active') : tCommon('inactive');
     
     try {
       setUpdatingStatus(id);
@@ -103,8 +148,8 @@ export default function ProductsPage() {
 
       // Mostrar mensaje de éxito con el estado actual
       Swal.fire({
-        title: '¡Estado actualizado!',
-        html: `El producto ahora está <strong>${statusText}</strong>`,
+        title: t('statusUpdated'),
+        html: `${t('product')} <strong>${statusText}</strong>`,
         icon: 'success',
         confirmButtonColor: '#4f46e5',
         timer: 2000,
@@ -113,8 +158,8 @@ export default function ProductsPage() {
     } catch (error) {
       console.error('Error updating status:', error);
       Swal.fire({
-        title: 'Error',
-        text: 'No se pudo actualizar el estado del producto',
+        title: tCommon('error'),
+        text: t('errorUpdating'),
         icon: 'error',
         confirmButtonColor: '#4f46e5'
       });
@@ -137,8 +182,8 @@ export default function ProductsPage() {
   };
 
   const getStockLabel = (stock: number) => {
-    if (stock === 0) return 'Sin stock';
-    if (stock < 10) return `Bajo (${stock})`;
+    if (stock === 0) return t('outOfStock');
+    if (stock < 10) return `${t('lowStock')} (${stock})`;
     return stock;
   };
 
@@ -147,38 +192,41 @@ export default function ProductsPage() {
       <div className={styles.productsPage}>
         <div className={styles.pageHeader}>
           <div className={styles.headerLeft}>
-            <h1>📦 Productos</h1>
-            <p>Gestiona tu catálogo de productos</p>
+            <h1><Package size={28} className={styles.titleIcon} /> {t('title')}</h1>
+            <p>{t('subtitle')}</p>
           </div>
           <button className={styles.addButton} onClick={handleCreate}>
-            <span>➕</span>
-            <span>Nuevo Producto</span>
+            <Plus size={20} />
+            <span>{t('createNew')}</span>
           </button>
         </div>
 
         <div className={styles.productsCard}>
           {isLoading ? (
             <div className={styles.loading}>
-              <p>Cargando productos...</p>
+              <p>{tCommon('loading')}</p>
             </div>
           ) : products.length === 0 ? (
             <div className={styles.emptyState}>
-              <h3>No hay productos</h3>
-              <p>Comienza agregando tu primer producto</p>
+              <h3>{t('noData')}</h3>
+              <p>{t('createFirst')}</p>
+              <button className={styles.addButton} onClick={handleCreate} style={{ marginTop: '1rem', margin: '0 auto' }}>
+                <Plus size={18} /> {t('createNew')}
+              </button>
             </div>
           ) : (
             <div className={styles.tableContainer}>
               <table className={styles.productsTable}>
                 <thead>
                   <tr>
-                    <th>Imagen</th>
-                    <th>Producto</th>
-                    <th>Categoría</th>
-                    <th>Marca</th>
-                    <th>Precio</th>
-                    <th>Stock</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
+                    <th><ImageIcon size={16} /> {t('image')}</th>
+                    <th>{t('name')}</th>
+                    <th><Tag size={16} /> {t('category')}</th>
+                    <th><Factory size={16} /> {t('brand')}</th>
+                    <th>{t('price')}</th>
+                    <th><BarChart2 size={16} /> {t('stock')}</th>
+                    <th>{tCommon('status')}</th>
+                    <th>{tCommon('actions')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -192,7 +240,9 @@ export default function ProductsPage() {
                             className={styles.productImage}
                           />
                         ) : (
-                          <div className={styles.productImage}>📦</div>
+                          <div className={styles.productImage}>
+                            <Package size={24} style={{ opacity: 0.5 }} />
+                          </div>
                         )}
                       </td>
                       <td>
@@ -223,7 +273,7 @@ export default function ProductsPage() {
                               product.status === 1 ? styles.active : styles.inactive
                             }`}
                           >
-                            {product.status === 1 ? 'Activo' : 'Inactivo'}
+                            {product.status === 1 ? tCommon('active') : tCommon('inactive')}
                           </span>
                         </div>
                       </td>
@@ -232,16 +282,16 @@ export default function ProductsPage() {
                           <button
                             className={`${styles.actionButton} ${styles.editButton}`}
                             onClick={() => handleEdit(product)}
-                            title="Editar"
+                            title={tCommon('edit')}
                           >
-                            ✏️
+                            <Pencil size={16} />
                           </button>
                           <button
                             className={`${styles.actionButton} ${styles.deleteButton}`}
                             onClick={() => handleDelete(product.id)}
-                            title="Eliminar"
+                            title={tCommon('delete')}
                           >
-                            🗑️
+                            <Trash2 size={16} />
                           </button>
                         </div>
                       </td>

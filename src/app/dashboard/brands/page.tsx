@@ -1,7 +1,17 @@
 'use client';
 
+'use client';
+
 import React, { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import Swal from 'sweetalert2';
+import {
+  Factory,
+  Plus,
+  Pencil,
+  Trash2,
+  Calendar
+} from 'lucide-react';
 import { DashboardLayout } from '@/core/design-system/DashboardLayout';
 import { BrandModal } from '@/modules/brands/components/BrandModal';
 import { brandService } from '@/modules/brands/services/brand.service';
@@ -9,6 +19,8 @@ import { Brand, BrandRequest } from '@/modules/brands/types/brand.types';
 import styles from './page.module.css';
 
 export default function BrandsPage() {
+  const t = useTranslations('brands');
+  const tCommon = useTranslations('common');
   const [brands, setBrands] = useState<Brand[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -27,8 +39,8 @@ export default function BrandsPage() {
     } catch (error) {
       console.error('Error loading brands:', error);
       Swal.fire({
-        title: 'Error',
-        text: 'No se pudieron cargar las marcas',
+        title: tCommon('error'),
+        text: t('errorLoading'),
         icon: 'error',
         confirmButtonColor: '#4f46e5'
       });
@@ -52,8 +64,8 @@ export default function BrandsPage() {
       if (selectedBrand) {
         await brandService.update(selectedBrand.id, brandData);
         Swal.fire({
-          title: '¡Actualizado!',
-          text: 'La marca ha sido actualizada correctamente',
+          title: t('updated'),
+          text: t('updatedSuccess'),
           icon: 'success',
           confirmButtonColor: '#4f46e5',
           timer: 2000
@@ -61,19 +73,20 @@ export default function BrandsPage() {
       } else {
         await brandService.create(brandData);
         Swal.fire({
-          title: '¡Creado!',
-          text: 'La marca ha sido creada correctamente',
+          title: t('created'),
+          text: t('createdSuccess'),
           icon: 'success',
           confirmButtonColor: '#4f46e5',
           timer: 2000
         });
       }
+      setIsModalOpen(false);
       await loadBrands();
     } catch (error) {
       console.error('Error saving brand:', error);
       Swal.fire({
-        title: 'Error',
-        text: 'No se pudo guardar la marca',
+        title: tCommon('error'),
+        text: t('errorSaving'),
         icon: 'error',
         confirmButtonColor: '#4f46e5'
       });
@@ -82,14 +95,14 @@ export default function BrandsPage() {
 
   const handleDelete = async (id: number) => {
     const result = await Swal.fire({
-      title: '¿Estás seguro?',
-      text: 'Esta acción no se puede deshacer',
+      title: t('deleteConfirm'),
+      text: t('deleteText'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#ef4444',
       cancelButtonColor: '#6b7280',
-      confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar'
+      confirmButtonText: tCommon('yes'),
+      cancelButtonText: tCommon('cancel')
     });
 
     if (!result.isConfirmed) return;
@@ -97,10 +110,10 @@ export default function BrandsPage() {
     try {
       await brandService.delete(id);
       setBrands(brands.filter(b => b.id !== id));
-      
+
       Swal.fire({
-        title: '¡Eliminado!',
-        text: 'La marca ha sido eliminada correctamente',
+        title: t('deleted'),
+        text: t('deletedSuccess'),
         icon: 'success',
         confirmButtonColor: '#4f46e5',
         timer: 2000
@@ -108,8 +121,8 @@ export default function BrandsPage() {
     } catch (error) {
       console.error('Error deleting brand:', error);
       Swal.fire({
-        title: 'Error',
-        text: 'No se pudo eliminar la marca',
+        title: tCommon('error'),
+        text: t('errorDeleting'),
         icon: 'error',
         confirmButtonColor: '#4f46e5'
       });
@@ -118,19 +131,19 @@ export default function BrandsPage() {
 
   const handleStatusToggle = async (id: number, currentStatus: number) => {
     const newStatus = currentStatus === 1 ? 0 : 1;
-    const statusText = newStatus === 1 ? 'Activa' : 'Inactiva';
-    
+    const statusText = newStatus === 1 ? t('activated') : t('deactivated');
+
     try {
       setUpdatingStatus(id);
       await brandService.updateStatus(id, currentStatus);
-      
-      setBrands(brands.map(b => 
+
+      setBrands(brands.map(b =>
         b.id === id ? { ...b, status: newStatus } : b
       ));
 
       Swal.fire({
-        title: '¡Estado actualizado!',
-        html: `La marca ahora está <strong>${statusText}</strong>`,
+        title: t('statusUpdated'),
+        html: `${t('brand')} <strong>${statusText}</strong>`,
         icon: 'success',
         confirmButtonColor: '#4f46e5',
         timer: 2000,
@@ -139,8 +152,8 @@ export default function BrandsPage() {
     } catch (error) {
       console.error('Error updating status:', error);
       Swal.fire({
-        title: 'Error',
-        text: 'No se pudo actualizar el estado de la marca',
+        title: tCommon('error'),
+        text: t('errorUpdating'),
         icon: 'error',
         confirmButtonColor: '#4f46e5'
       });
@@ -159,92 +172,98 @@ export default function BrandsPage() {
 
   return (
     <DashboardLayout>
-      <div className={styles.container}>
-        <div className={styles.header}>
-          <div>
-            <h1 className={styles.title}>Gestión de Marcas</h1>
-            <p className={styles.subtitle}>Administra las marcas de productos</p>
+      <div className={styles.brandsPage}>
+        <div className={styles.pageHeader}>
+          <div className={styles.headerLeft}>
+            <h1><Factory size={28} className={styles.titleIcon} /> {t('title')}</h1>
+            <p>{t('subtitle')}</p>
           </div>
-          <button className={styles.createButton} onClick={handleCreate}>
-            + Nueva Marca
+          <button className={styles.addButton} onClick={handleCreate}>
+            <Plus size={20} />
+            <span>{t('createNew')}</span>
           </button>
         </div>
 
-        {isLoading ? (
-          <div className={styles.loading}>Cargando marcas...</div>
-        ) : brands.length === 0 ? (
-          <div className={styles.emptyState}>
-            <p>No hay marcas registradas</p>
-            <button className={styles.createButton} onClick={handleCreate}>
-              Crear primera marca
-            </button>
-          </div>
-        ) : (
-          <div className={styles.tableContainer}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Nombre</th>
-                  <th>Descripción</th>
-                  <th>Estado</th>
-                  <th>Fecha Creación</th>
-                  <th>Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {brands.map((brand) => (
-                  <tr key={brand.id}>
-                    <td>{brand.id}</td>
-                    <td className={styles.brandName}>{brand.name}</td>
-                    <td className={styles.description}>
-                      {brand.description || '-'}
-                    </td>
-                    <td>
-                      <div className={styles.statusCell}>
-                        <label className={styles.statusToggle}>
-                          <input
-                            type="checkbox"
-                            checked={brand.status === 1}
-                            onChange={() => handleStatusToggle(brand.id, brand.status)}
-                            disabled={updatingStatus === brand.id}
-                          />
-                          <span className={styles.slider}></span>
-                        </label>
-                        <span
-                          className={`${styles.status} ${
-                            brand.status === 1 ? styles.active : styles.inactive
-                          }`}
-                        >
-                          {brand.status === 1 ? 'Activo' : 'Inactivo'}
-                        </span>
-                      </div>
-                    </td>
-                    <td className={styles.date}>{formatDate(brand.createdAt)}</td>
-                    <td>
-                      <div className={styles.actions}>
-                        <button
-                          className={`${styles.actionButton} ${styles.editButton}`}
-                          onClick={() => handleEdit(brand)}
-                          title="Editar"
-                        >
-                          ✏️
-                        </button>
-                        <button
-                          className={`${styles.actionButton} ${styles.deleteButton}`}
-                          onClick={() => handleDelete(brand.id)}
-                          title="Eliminar"
-                        >
-                          🗑️
-                        </button>
-                      </div>
-                    </td>
+        <div className={styles.brandsCard}>
+          {isLoading ? (
+            <div className={styles.loading}>
+              <p>{tCommon('loading')}</p>
+            </div>
+          ) : brands.length === 0 ? (
+            <div className={styles.emptyState}>
+              <Factory size={48} style={{ opacity: 0.2, marginBottom: '1rem' }} />
+              <h3>{t('noData')}</h3>
+              <button className={styles.addButton} onClick={handleCreate} style={{ marginTop: '1rem', margin: '0 auto' }}>
+                <Plus size={18} /> {t('createFirst')}
+              </button>
+            </div>
+          ) : (
+            <div className={styles.tableContainer}>
+              <table className={styles.brandsTable}>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>{t('name')}</th>
+                    <th>{t('description')}</th>
+                    <th>{tCommon('status')}</th>
+                    <th><Calendar size={16} /> {t('createdAt')}</th>
+                    <th>{tCommon('actions')}</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+                </thead>
+                <tbody>
+                  {brands.map((brand) => (
+                    <tr key={brand.id}>
+                      <td>{brand.id}</td>
+                      <td className={styles.brandName}>{brand.name}</td>
+                      <td className={styles.description}>
+                        {brand.description || '-'}
+                      </td>
+                      <td>
+                        <div className={styles.statusCell}>
+                          <label className={styles.statusToggle}>
+                            <input
+                              type="checkbox"
+                              checked={brand.status === 1}
+                              onChange={() => handleStatusToggle(brand.id, brand.status)}
+                              disabled={updatingStatus === brand.id}
+                            />
+                            <span className={styles.slider}></span>
+                          </label>
+                          <span
+                            className={`${styles.status} ${
+                              brand.status === 1 ? styles.active : styles.inactive
+                            }`}
+                          >
+                            {brand.status === 1 ? tCommon('active') : tCommon('inactive')}
+                          </span>
+                        </div>
+                      </td>
+                      <td className={styles.date}>{formatDate(brand.createdAt)}</td>
+                      <td>
+                        <div className={styles.actions}>
+                          <button
+                            className={`${styles.actionButton} ${styles.editButton}`}
+                            onClick={() => handleEdit(brand)}
+                            title={tCommon('edit')}
+                          >
+                            <Pencil size={16} />
+                          </button>
+                          <button
+                            className={`${styles.actionButton} ${styles.deleteButton}`}
+                            onClick={() => handleDelete(brand.id)}
+                            title={tCommon('delete')}
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
 
         <BrandModal
           isOpen={isModalOpen}

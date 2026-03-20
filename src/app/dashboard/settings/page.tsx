@@ -1,5 +1,7 @@
 'use client';
 
+'use client';
+
 import React from 'react';
 import { DashboardLayout } from '@/core/design-system/DashboardLayout';
 

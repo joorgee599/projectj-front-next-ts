@@ -1,13 +1,33 @@
-'use client';
-
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { 
+  LayoutDashboard, 
+  BarChart, 
+  FileText, 
+  Package, 
+  Tags, 
+  Factory, 
+  Truck, 
+  Users, 
+  User, 
+  Shield, 
+  Key, 
+  UserPlus, 
+  ShoppingCart, 
+  UserCircle, 
+  Settings, 
+  Plug, 
+  Lock,
+  ChevronRight,
+  ChevronDown
+} from 'lucide-react';
 import styles from './Sidebar.module.css';
 
 interface NavItem {
   label: string;
-  icon: string;
+  icon: React.ReactNode;
   href: string;
   badge?: string;
   subItems?: NavItem[];
@@ -26,44 +46,6 @@ interface SidebarProps {
   userRole?: string;
 }
 
-const navSections: NavSection[] = [
-  {
-    title: 'Principal',
-    items: [
-      { label: 'Dashboard', icon: '📊', href: '/dashboard' },
-      { label: 'Análisis', icon: '📈', href: '/dashboard/analytics' },
-      { label: 'Reportes', icon: '📋', href: '/dashboard/reports' },
-    ],
-  },
-  {
-    title: 'Gestión',
-    items: [
-      { 
-        label: 'Gestión de Productos', 
-        icon: '📦', 
-        href: '/dashboard/products',
-        subItems: [
-          { label: 'Productos', icon: '📦', href: '/dashboard/products', badge: '12' },
-          { label: 'Categorías', icon: '🏷️', href: '/dashboard/categories' },
-          { label: 'Marcas', icon: '🏭', href: '/dashboard/brands' },
-        ]
-      },
-      { label: 'Proveedores', icon: '🚚', href: '/dashboard/providers' },
-      { label: 'Usuarios', icon: '👥', href: '/dashboard/users' },
-      { label: 'Órdenes', icon: '🛒', href: '/dashboard/orders', badge: '3' },
-    ],
-  },
-  {
-    title: 'Configuración',
-    items: [
-      { label: 'Mi Perfil', icon: '👤', href: '/dashboard/profile' },
-      { label: 'Ajustes', icon: '⚙️', href: '/dashboard/settings' },
-      { label: 'Integraciones', icon: '🔌', href: '/dashboard/integrations' },
-      { label: 'Seguridad', icon: '🔒', href: '/dashboard/security' },
-    ],
-  },
-];
-
 export const Sidebar: React.FC<SidebarProps> = ({
   isCollapsed,
   onToggle,
@@ -72,7 +54,57 @@ export const Sidebar: React.FC<SidebarProps> = ({
   userRole = 'Administrador',
 }) => {
   const pathname = usePathname();
+  const t = useTranslations('sidebar');
+  const tCommon = useTranslations('common');
   const [expandedItems, setExpandedItems] = React.useState<Set<string>>(new Set());
+
+  const navSections: NavSection[] = [
+    {
+      title: t('principal'),
+      items: [
+        { label: t('dashboard'), icon: <LayoutDashboard size={20} />, href: '/dashboard' },
+        { label: t('analytics'), icon: <BarChart size={20} />, href: '/dashboard/analytics' },
+        { label: t('reports'), icon: <FileText size={20} />, href: '/dashboard/reports' },
+      ],
+    },
+    {
+      title: t('management'),
+      items: [
+        { 
+          label: t('productManagement'), 
+          icon: <Package size={20} />, 
+          href: '/dashboard/products',
+          subItems: [
+            { label: t('products'), icon: <Package size={18} />, href: '/dashboard/products', badge: '12' },
+            { label: t('categories'), icon: <Tags size={18} />, href: '/dashboard/categories' },
+            { label: t('brands'), icon: <Factory size={18} />, href: '/dashboard/brands' },
+          ]
+        },
+        { label: t('providers'), icon: <Truck size={20} />, href: '/dashboard/providers' },
+        { 
+          label: t('userManagement'), 
+          icon: <Users size={20} />, 
+          href: '/dashboard/users',
+          subItems: [
+            { label: t('users'), icon: <User size={18} />, href: '/dashboard/users' },
+            { label: t('roles'), icon: <Shield size={18} />, href: '/dashboard/roles' },
+            { label: t('permissions'), icon: <Key size={18} />, href: '/dashboard/permissions' },
+            { label: t('clients'), icon: <UserPlus size={18} />, href: '/dashboard/clients' },
+          ]
+        },
+        { label: t('orders'), icon: <ShoppingCart size={20} />, href: '/dashboard/orders', badge: '3' },
+      ],
+    },
+    {
+      title: t('configuration'),
+      items: [
+        { label: t('myProfile'), icon: <UserCircle size={20} />, href: '/dashboard/profile' },
+        { label: t('settings'), icon: <Settings size={20} />, href: '/dashboard/settings' },
+        { label: t('integrations'), icon: <Plug size={20} />, href: '/dashboard/integrations' },
+        { label: t('security'), icon: <Lock size={20} />, href: '/dashboard/security' },
+      ],
+    },
+  ];
 
   const toggleExpand = (label: string) => {
     // If sidebar is collapsed, expand it first

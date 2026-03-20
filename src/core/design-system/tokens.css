@@ -7,11 +7,47 @@
   --glass: rgba(255, 255, 255, 0.7);
   --glass-border: rgba(255, 255, 255, 0.3);
   
+  /* Light mode specific colors */
+  --card-bg: #ffffff;
+  --border-color: #e5e7eb;
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --hover-bg: #f9fafb;
+  --sidebar-bg: #1e293b;
+  --sidebar-text: #e5e7eb;
+  --primary-light: rgba(79, 70, 229, 0.1);
+  
   --font-main: 'Inter', system-ui, -apple-system, sans-serif;
   
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 10px 10px -5px rgb(0 0 0 / 0.04);
+}
+
+.dark {
+  --primary: #6366f1;
+  --primary-hover: #818cf8;
+  --secondary: #94a3b8;
+  --background: #0f172a;
+  --foreground: #f1f5f9;
+  --glass: rgba(30, 41, 59, 0.7);
+  --glass-border: rgba(71, 85, 105, 0.3);
+  
+  /* Dark mode specific colors */
+  --card-bg: #1e293b;
+  --border-color: #334155;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --hover-bg: #334155;
+  --sidebar-bg: #0f172a;
+  --sidebar-text: #cbd5e1;
+  --primary-light: rgba(99, 102, 241, 0.2);
+  
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.5);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.5);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5), 0 4px 6px -4px rgb(0 0 0 / 0.5);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.6), 0 10px 10px -5px rgb(0 0 0 / 0.4);
 }
 
 * {

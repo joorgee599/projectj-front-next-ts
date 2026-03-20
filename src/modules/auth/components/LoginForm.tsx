@@ -1,13 +1,13 @@
-'use client';
-
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/core/design-system/Button';
 import { Input } from '@/core/design-system/Input';
 import { authService } from '../services/auth.service';
 import styles from './LoginForm.module.css';
 
-export const LoginForm: React.FC = () => {
+export const LoginForm: React.FC<any> = ({ onSubmit: propOnSubmit }) => {
+  const t = useTranslations('auth');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -20,10 +20,14 @@ export const LoginForm: React.FC = () => {
     setError('');
 
     try {
-      await authService.login({ email, password });
-      router.push('/dashboard');
+      if (propOnSubmit) {
+        await propOnSubmit(email, password);
+      } else {
+        await authService.login({ email, password });
+        router.push('/dashboard');
+      }
     } catch (err: any) {
-      setError(err.message || 'Login failed. Check your credentials.');
+      setError(err.message || t('enterCredentials'));
     } finally {
       setLoading(false);
     }
@@ -31,12 +35,12 @@ export const LoginForm: React.FC = () => {
 
   return (
     <form className={`${styles.form} glass-card`} onSubmit={handleSubmit}>
-      <h1 className={styles.title}>Welcome Back</h1>
-      <p className={styles.subtitle}>Enter your credentials to continue</p>
+      <h1 className={styles.title}>{t('login')}</h1>
+      <p className={styles.subtitle}>{t('enterCredentials')}</p>
       
       <Input 
         type="email"
-        label="Email" 
+        label={t('email')} 
         placeholder="e.g. jdoe@example.com" 
         value={email} 
         onChange={(e) => setEmail(e.target.value)}
@@ -45,8 +49,8 @@ export const LoginForm: React.FC = () => {
 
       <Input 
         type="password"
-        label="Password" 
-        placeholder="Enter your password" 
+        label={t('password')} 
+        placeholder="••••••••" 
         value={password} 
         onChange={(e) => setPassword(e.target.value)}
         required
@@ -55,7 +59,7 @@ export const LoginForm: React.FC = () => {
       {error && <div className={styles.error}>{error}</div>}
 
       <Button type="submit" loading={loading} className={styles.submit}>
-        Sign In
+        {t('login')}
       </Button>
     </form>
   );

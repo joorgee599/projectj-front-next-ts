@@ -8,14 +8,15 @@
 .label {
   font-size: 0.875rem;
   font-weight: 500;
-  color: var(--secondary);
+  color: var(--text-secondary);
 }
 
 .input {
   padding: 12px;
   border-radius: 8px;
-  border: 1px solid #e2e8f0;
-  background: white;
+  border: 1px solid var(--border-color);
+  background: var(--card-bg);
+  color: var(--text-primary);
   font-size: 1rem;
   transition: all 0.2s ease;
   outline: none;
