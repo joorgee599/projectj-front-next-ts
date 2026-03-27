@@ -58,6 +58,19 @@
   border-collapse: collapse;
 }
 
+.moduleBadge {
+  display: inline-block;
+  padding: 0.2rem 0.55rem;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: var(--primary-light);
+  color: var(--primary);
+  border: 1px solid rgba(79, 70, 229, 0.25);
+}
+
 .permissionsTable thead {
   background: var(--hover-bg);
   border-bottom: 2px solid var(--border-color);

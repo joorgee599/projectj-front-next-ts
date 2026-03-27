@@ -19,6 +19,7 @@ export const PermissionModal: React.FC<PermissionModalProps> = ({ isOpen, onClos
   const [formData, setFormData] = useState<PermissionRequest>({
     name: '',
     description: '',
+    module: '',
   });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -28,11 +29,13 @@ export const PermissionModal: React.FC<PermissionModalProps> = ({ isOpen, onClos
       setFormData({
         name: permission.name,
         description: permission.description || '',
+        module: permission.module || '',
       });
     } else {
       setFormData({
         name: '',
         description: '',
+        module: '',
       });
     }
     setErrors({});
@@ -97,6 +100,18 @@ export const PermissionModal: React.FC<PermissionModalProps> = ({ isOpen, onClos
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               disabled={isSubmitting}
               rows={3}
+            />
+          </div>
+
+          <div className={styles.formGroup}>
+            <label htmlFor="module">Módulo</label>
+            <input
+              type="text"
+              id="module"
+              value={formData.module || ''}
+              onChange={(e) => setFormData({ ...formData, module: e.target.value })}
+              disabled={isSubmitting}
+              placeholder="Ej: PRODUCTS, USERS, SALES..."
             />
           </div>
 

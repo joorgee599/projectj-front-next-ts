@@ -131,29 +131,54 @@ export const RoleModal: React.FC<RoleModalProps> = ({ isOpen, onClose, onSubmit,
 
           <div className={styles.formGroup}>
             <label>{t('permissions')}</label>
-            <div className={styles.permissionsGrid}>
-              {allPermissions.map(permission => {
-                const isSelected = selectedPermissionIds.includes(permission.id);
-                return (
-                  <label key={permission.id} className={`${styles.permissionItem} ${isSelected ? styles.selected : ''}`}>
-                    <input
-                      type="checkbox"
-                      checked={isSelected}
-                      onChange={() => handleTogglePermission(permission.id)}
-                      className={styles.checkbox}
-                    />
-                    <div className={styles.permissionInfo}>
-                      <span className={styles.permissionName}>{permission.name}</span>
-                      {permission.description && (
-                        <span className={styles.permissionDesc}>{permission.description}</span>
-                      )}
-                    </div>
-                  </label>
-                );
-              })}
-            </div>
-            {allPermissions.length === 0 && (
+            {allPermissions.length === 0 ? (
               <p className={styles.noPermissions}>{t('loadingRoles')}</p>
+            ) : (
+              <div className={styles.modulesContainer}>
+                {(Object.entries(
+                  allPermissions.reduce((acc, p) => {
+                    const mod = p.module || 'OTHER';
+                    if (!acc[mod]) acc[mod] = [];
+                    acc[mod].push(p);
+                    return acc;
+                  }, {} as Record<string, Permission[]>)
+                ) as [string, Permission[]][]).sort(([a], [b]) => a.localeCompare(b)).map(([mod, perms]) => {
+                  const allSelected = perms.every(p => selectedPermissionIds.includes(p.id));
+                  return (
+                    <div key={mod} className={styles.moduleSection}>
+                      <div className={styles.moduleHeader}>
+                        <span className={styles.moduleName}>{mod}</span>
+                        <button
+                          type="button"
+                          className={styles.selectAllBtn}
+                          onClick={() => {
+                            const ids = perms.map(p => p.id);
+                            if (allSelected) {
+                              setSelectedPermissionIds(prev => prev.filter(id => !ids.includes(id)));
+                            } else {
+                              setSelectedPermissionIds(prev => [...new Set([...prev, ...ids])]);
+                            }
+                          }}
+                        >
+                          {allSelected ? '✕ Quitar' : '✓ Todos'}
+                        </button>
+                      </div>
+                      <div className={styles.checkboxGrid}>
+                        {perms.map(permission => (
+                          <label key={permission.id} className={styles.checkboxLabel}>
+                            <input
+                              type="checkbox"
+                              checked={selectedPermissionIds.includes(permission.id)}
+                              onChange={() => handleTogglePermission(permission.id)}
+                            />
+                            <span className={styles.checkboxText}>{permission.name}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             )}
           </div>
 

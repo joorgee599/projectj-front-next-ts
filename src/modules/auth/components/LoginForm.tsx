@@ -4,6 +4,8 @@ import { useTranslations } from 'next-intl';
 import { Button } from '@/core/design-system/Button';
 import { Input } from '@/core/design-system/Input';
 import { authService } from '../services/auth.service';
+import { guestCartService } from '@/modules/cart/services/guest-cart.service';
+import { cartSyncService } from '@/modules/cart/services/cart-sync.service';
 import styles from './LoginForm.module.css';
 
 export const LoginForm: React.FC<any> = ({ onSubmit: propOnSubmit }) => {
@@ -24,7 +26,21 @@ export const LoginForm: React.FC<any> = ({ onSubmit: propOnSubmit }) => {
         await propOnSubmit(email, password);
       } else {
         await authService.login({ email, password });
-        router.push('/dashboard');
+        const redirectTarget = guestCartService.consumePostLoginRedirect();
+
+        if (redirectTarget) {
+          try {
+            if (guestCartService.hasItems()) {
+              await cartSyncService.syncGuestCartToBackend();
+            }
+            router.push(redirectTarget);
+          } catch (syncError: any) {
+            setError(syncError?.message || 'No se pudo sincronizar el carrito.');
+            router.push('/dashboard');
+          }
+        } else {
+          router.push('/dashboard');
+        }
       }
     } catch (err: any) {
       setError(err.message || t('enterCredentials'));
@@ -41,7 +57,7 @@ export const LoginForm: React.FC<any> = ({ onSubmit: propOnSubmit }) => {
       <Input 
         type="email"
         label={t('email')} 
-        placeholder="e.g. jdoe@example.com" 
+        placeholder="" 
         value={email} 
         onChange={(e) => setEmail(e.target.value)}
         required
@@ -50,7 +66,7 @@ export const LoginForm: React.FC<any> = ({ onSubmit: propOnSubmit }) => {
       <Input 
         type="password"
         label={t('password')} 
-        placeholder="••••••••" 
+        placeholder="" 
         value={password} 
         onChange={(e) => setPassword(e.target.value)}
         required

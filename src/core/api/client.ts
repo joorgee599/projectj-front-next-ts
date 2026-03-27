@@ -13,8 +13,9 @@ export const apiClient = {
     // Get token from localStorage (simplified for now)
     const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
     
+    const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
     const headers = {
-      'Content-Type': 'application/json',
+      ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
       ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
       ...options.headers,
     };
@@ -41,7 +42,7 @@ export const apiClient = {
     return this.request<T>(endpoint, {
       ...options,
       method: 'POST',
-      body: JSON.stringify(body),
+      body: body instanceof FormData ? body : JSON.stringify(body),
     });
   },
 
@@ -49,7 +50,17 @@ export const apiClient = {
     return this.request<T>(endpoint, {
       ...options,
       method: 'PUT',
-      body: JSON.stringify(body),
+      body: body instanceof FormData ? body : JSON.stringify(body),
+    });
+  },
+
+  patch<T>(endpoint: string, body?: any, options?: RequestInit) {
+    return this.request<T>(endpoint, {
+      ...options,
+      method: 'PATCH',
+      ...(body !== undefined
+        ? { body: body instanceof FormData ? body : JSON.stringify(body) }
+        : {}),
     });
   },
 

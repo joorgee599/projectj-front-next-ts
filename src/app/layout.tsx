@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages } from 'next-intl/server';
 import { ThemeProvider } from "@/core/providers/ThemeProvider";
+import { ChatWidget } from '@/modules/chat/components/ChatWidget';
 import "./globals.css";
 import "@/core/design-system/tokens.css";
 
@@ -40,6 +41,7 @@ export default async function RootLayout({
         >
           <NextIntlClientProvider messages={messages} locale={locale}>
             {children}
+            <ChatWidget />
           </NextIntlClientProvider>
         </ThemeProvider>
       </body>

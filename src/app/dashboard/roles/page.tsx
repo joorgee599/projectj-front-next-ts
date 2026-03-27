@@ -8,12 +8,15 @@ import {
   Plus, 
   Pencil, 
   Trash2, 
-  Lock 
+  Lock,
+  Eye
 } from 'lucide-react';
 import { DashboardLayout } from '@/core/design-system/DashboardLayout';
+import { PermissionGuard } from '@/core/auth/PermissionGuard';
+import { useAuth } from '@/core/auth/useAuth';
 import { RoleModal } from '@/modules/roles/components/RoleModal';
 import { roleService } from '@/modules/roles/services/role.service';
-import { Role, RoleRequest } from '@/modules/roles/types/role.types';
+import { Role, RoleRequest, Permission } from '@/modules/roles/types/role.types';
 import styles from './page.module.css';
 
 export default function RolesPage() {
@@ -23,6 +26,8 @@ export default function RolesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
+  const [expandedId, setExpandedId] = useState<number | null>(null);
+  const { hasPermission } = useAuth();
 
   useEffect(() => {
     loadRoles();
@@ -126,6 +131,7 @@ export default function RolesPage() {
   };
 
   return (
+    <PermissionGuard permission="READ_ROLES">
     <DashboardLayout>
       <div className={styles.rolesPage}>
         <div className={styles.pageHeader}>
@@ -133,10 +139,12 @@ export default function RolesPage() {
             <h1><ShieldCheck size={28} className={styles.titleIcon} /> {t('title')}</h1>
             <p>{t('subtitle')}</p>
           </div>
-          <button className={styles.addButton} onClick={handleCreate}>
-            <Plus size={20} />
-            <span>{t('createNew')}</span>
-          </button>
+          {hasPermission('CREATE_ROLES') && (
+            <button className={styles.addButton} onClick={handleCreate}>
+              <Plus size={20} />
+              <span>{t('createNew')}</span>
+            </button>
+          )}
         </div>
 
         <div className={styles.rolesCard}>
@@ -162,45 +170,74 @@ export default function RolesPage() {
                 </thead>
                 <tbody>
                   {roles.map((role) => (
-                    <tr key={role.id}>
-                      <td className={styles.roleName}>{role.name}</td>
-                      <td className={styles.roleDescription}>
-                        {role.description || '-'}
-                      </td>
-                      <td>
-                        <div className={styles.permissionsGroup}>
-                          {role.permissions?.slice(0, 5).map(p => (
-                            <span key={p.id} className={styles.permissionBadge}>
-                              {p.name}
-                            </span>
-                          ))}
-                          {role.permissions && role.permissions.length > 5 && (
-                            <span className={styles.permissionBadge}>
-                              +{role.permissions.length - 5}
-                            </span>
-                          )}
-                          {(!role.permissions || role.permissions.length === 0) && '-'}
-                        </div>
-                      </td>
-                      <td>
-                        <div className={styles.actions}>
+                    <React.Fragment key={role.id}>
+                      <tr>
+                        <td className={styles.roleName}>{role.name}</td>
+                        <td className={styles.roleDescription}>
+                          {role.description || '-'}
+                        </td>
+                        <td>
                           <button
-                            className={`${styles.actionButton} ${styles.editButton}`}
-                            onClick={() => handleEdit(role)}
-                            title={tCommon('edit')}
+                            className={styles.detailsToggle}
+                            onClick={() => setExpandedId(expandedId === role.id ? null : role.id)}
                           >
-                            <Pencil size={16} />
+                            <Eye size={14} />
+                            <span>{role.permissions?.length ?? 0} permisos</span>
                           </button>
-                          <button
-                            className={`${styles.actionButton} ${styles.deleteButton}`}
-                            onClick={() => handleDelete(role.id)}
-                            title={tCommon('delete')}
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
+                        </td>
+                        <td>
+                          <div className={styles.actions}>
+                            {hasPermission('UPDATE_ROLES') && (
+                              <button
+                                className={`${styles.actionButton} ${styles.editButton}`}
+                                onClick={() => handleEdit(role)}
+                                title={tCommon('edit')}
+                              >
+                                <Pencil size={16} />
+                              </button>
+                            )}
+                            {hasPermission('DELETE_ROLES') && (
+                              <button
+                                className={`${styles.actionButton} ${styles.deleteButton}`}
+                                onClick={() => handleDelete(role.id)}
+                                title={tCommon('delete')}
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                      {expandedId === role.id && (
+                        <tr className={styles.detailsRow}>
+                          <td colSpan={4}>
+                            <div className={styles.detailsExpanded}>
+                              {role.permissions && role.permissions.length > 0 ? (
+                                (Object.entries(
+                                  role.permissions.reduce((acc, p) => {
+                                    const mod = p.module || 'OTHER';
+                                    if (!acc[mod]) acc[mod] = [];
+                                    acc[mod].push(p);
+                                    return acc;
+                                  }, {} as Record<string, Permission[]>)
+                                ) as [string, Permission[]][]).sort(([a], [b]) => a.localeCompare(b)).map(([mod, perms]) => (
+                                  <div key={mod} className={styles.moduleGroup}>
+                                    <span className={styles.moduleLabel}>{mod}</span>
+                                    <div className={styles.permBadges}>
+                                      {perms.map(p => (
+                                        <span key={p.id} className={styles.permissionBadge}>{p.name}</span>
+                                      ))}
+                                    </div>
+                                  </div>
+                                ))
+                              ) : (
+                                <span className={styles.noPerms}>Sin permisos asignados</span>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
                   ))}
                 </tbody>
               </table>
@@ -216,5 +253,6 @@ export default function RolesPage() {
         />
       </div>
     </DashboardLayout>
+    </PermissionGuard>
   );
 }

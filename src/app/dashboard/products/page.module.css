@@ -93,6 +93,61 @@
   border-radius: 8px;
   object-fit: cover;
   background: var(--background);
+  border: 1px solid var(--border-color);
+  display: block;
+}
+
+.imagePreview {
+  position: relative;
+  width: fit-content;
+}
+
+.imageZoom {
+  position: absolute;
+  left: calc(100% + 0.75rem);
+  top: 50%;
+  transform: translateY(-50%) scale(0.96);
+  width: 180px;
+  height: 180px;
+  border-radius: 16px;
+  padding: 0.5rem;
+  background: color-mix(in srgb, var(--card-bg) 92%, transparent);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-lg);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 5;
+  backdrop-filter: blur(12px);
+}
+
+.imagePreview:hover .imageZoom {
+  opacity: 1;
+  transform: translateY(-50%) scale(1);
+}
+
+.productImageLarge {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 12px;
+}
+
+.imageFallback {
+  width: 50px;
+  min-height: 50px;
+  border-radius: 10px;
+  border: 1px dashed var(--border-color);
+  background: var(--hover-bg);
+  color: var(--text-secondary);
+  display: grid;
+  place-items: center;
+  gap: 0.2rem;
+  padding: 0.25rem;
+  text-align: center;
+  font-size: 0.55rem;
+  font-weight: 700;
 }
 
 .productName {
@@ -133,6 +188,11 @@
 .stock.outOfStock {
   background: #fee2e2;
   color: #991b1b;
+}
+
+.stock.overStock {
+  background: #ede9fe;
+  color: #5b21b6;
 }
 
 .statusCell {
@@ -283,6 +343,10 @@
     width: 100%;
     justify-content: center;
   }
+
+  .imageZoom {
+    display: none;
+  }
 }
 
 /* Dark mode overrides */
@@ -302,4 +366,9 @@
 :global(.dark) .stock.outOfStock {
   background: rgba(239, 68, 68, 0.2);
   color: #ef4444;
+}
+
+:global(.dark) .stock.overStock {
+  background: rgba(139, 92, 246, 0.2);
+  color: #a78bfa;
 }

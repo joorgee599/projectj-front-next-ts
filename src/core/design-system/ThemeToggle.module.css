@@ -1,6 +1,6 @@
 .themeToggle {
   background: transparent;
-  border: none;
+  border: 1px solid var(--border-color);
   cursor: pointer;
   padding: 8px;
   border-radius: 8px;
@@ -8,14 +8,16 @@
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
+  color: var(--text-secondary);
 }
 
 .themeToggle:hover {
-  background-color: rgba(79, 70, 229, 0.1);
+  background-color: var(--primary-light);
+  border-color: var(--primary);
+  color: var(--primary);
 }
 
 .icon {
-  font-size: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -24,7 +26,7 @@
 .skeleton {
   width: 36px;
   height: 36px;
-  background-color: #f3f4f6;
+  background-color: var(--hover-bg);
   border-radius: 8px;
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }

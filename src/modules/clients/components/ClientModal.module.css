@@ -77,12 +77,16 @@
 .modalBody {
   padding: 2.5rem;
   overflow-y: auto;
+  flex: 1;
+  min-height: 0;
 }
 
 .form {
   display: flex;
   flex-direction: column;
   gap: 1.75rem;
+  flex: 1;
+  min-height: 0;
 }
 
 .formGroup {
@@ -219,6 +223,10 @@
   .cancelButton,
   .submitButton {
     width: 100%;
+  }
+
+  .modalBody {
+    padding: 1.5rem;
   }
 }
 

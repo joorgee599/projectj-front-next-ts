@@ -4,8 +4,10 @@ export interface User {
   id: number;
   name: string;
   email: string;
-  roleId?: number;
-  roleName?: string;
+  roleIds?: number[];
+  roleNames?: string[];
+  permissionIds?: number[];
+  permissionNames?: string[];
   status: number;
   createdAt: string;
   updatedAt: string;
@@ -15,7 +17,8 @@ export interface UserRequest {
   name: string;
   email: string;
   password?: string;
-  roleId: number;
+  roleIds: number[];
+  permissionIds: number[];
   status?: number;
 }
 

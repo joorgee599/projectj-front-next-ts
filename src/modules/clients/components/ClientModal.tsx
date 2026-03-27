@@ -29,6 +29,7 @@ export const ClientModal: React.FC<ClientModalProps> = ({
     address: '',
     temporaryPassword: '',
   });
+  const [confirmPassword, setConfirmPassword] = useState('');
   
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -53,6 +54,7 @@ export const ClientModal: React.FC<ClientModalProps> = ({
         temporaryPassword: '',
       });
     }
+    setConfirmPassword('');
     setErrors({});
   }, [client, isOpen]);
 
@@ -71,6 +73,14 @@ export const ClientModal: React.FC<ClientModalProps> = ({
     
     if (!client && !formData.temporaryPassword?.trim()) {
       newErrors.temporaryPassword = t('passwordRequired');
+    }
+
+    if (!client && formData.temporaryPassword?.trim()) {
+      if (!confirmPassword.trim()) {
+        newErrors.confirmPassword = t('confirmPasswordRequired');
+      } else if (formData.temporaryPassword !== confirmPassword) {
+        newErrors.confirmPassword = t('passwordMismatch');
+      }
     }
 
     setErrors(newErrors);
@@ -166,18 +176,33 @@ export const ClientModal: React.FC<ClientModalProps> = ({
               </div>
 
               {!client && (
-                <div className={styles.formGroup}>
-                  <label className={styles.label}>{t('password')} *</label>
-                  <input
-                    type="password"
-                    value={formData.temporaryPassword}
-                    onChange={(e) => setFormData({ ...formData, temporaryPassword: e.target.value })}
-                    className={`${styles.input} ${errors.temporaryPassword ? styles.inputError : ''}`}
-                    disabled={isSubmitting}
-                    placeholder={t('passwordRequired')}
-                  />
-                  {errors.temporaryPassword && <span className={styles.error}>{errors.temporaryPassword}</span>}
-                </div>
+                <>
+                  <div className={styles.formGroup}>
+                    <label className={styles.label}>{t('password')} *</label>
+                    <input
+                      type="password"
+                      value={formData.temporaryPassword}
+                      onChange={(e) => setFormData({ ...formData, temporaryPassword: e.target.value })}
+                      className={`${styles.input} ${errors.temporaryPassword ? styles.inputError : ''}`}
+                      disabled={isSubmitting}
+                      placeholder={t('passwordRequired')}
+                    />
+                    {errors.temporaryPassword && <span className={styles.error}>{errors.temporaryPassword}</span>}
+                  </div>
+
+                  <div className={styles.formGroup}>
+                    <label className={styles.label}>{t('confirmPassword')} *</label>
+                    <input
+                      type="password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className={`${styles.input} ${errors.confirmPassword ? styles.inputError : ''}`}
+                      disabled={isSubmitting}
+                      placeholder={t('confirmPasswordPlaceholder')}
+                    />
+                    {errors.confirmPassword && <span className={styles.error}>{errors.confirmPassword}</span>}
+                  </div>
+                </>
               )}
             </div>
 

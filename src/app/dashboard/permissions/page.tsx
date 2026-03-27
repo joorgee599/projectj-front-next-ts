@@ -10,6 +10,8 @@ import {
   Trash2 
 } from 'lucide-react';
 import { DashboardLayout } from '@/core/design-system/DashboardLayout';
+import { PermissionGuard } from '@/core/auth/PermissionGuard';
+import { useAuth } from '@/core/auth/useAuth';
 import { PermissionModal } from '@/modules/permissions/components/PermissionModal';
 import { permissionService } from '@/modules/permissions/services/permission.service';
 import { Permission, PermissionRequest } from '@/modules/permissions/types/permission.types';
@@ -22,6 +24,7 @@ export default function PermissionsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPermission, setSelectedPermission] = useState<Permission | null>(null);
+  const { hasPermission } = useAuth();
 
   useEffect(() => {
     loadPermissions();
@@ -125,6 +128,7 @@ export default function PermissionsPage() {
   };
 
   return (
+    <PermissionGuard permission="READ_PERMISSIONS">
     <DashboardLayout>
       <div className={styles.permissionsPage}>
         <div className={styles.pageHeader}>
@@ -132,10 +136,12 @@ export default function PermissionsPage() {
             <h1><Key size={28} className={styles.titleIcon} /> {t('title')}</h1>
             <p>{t('subtitle')}</p>
           </div>
-          <button className={styles.addButton} onClick={handleCreate}>
-            <Plus size={20} />
-            <span>{t('createNew')}</span>
-          </button>
+          {hasPermission('CREATE_PERMISSIONS') && (
+            <button className={styles.addButton} onClick={handleCreate}>
+              <Plus size={20} />
+              <span>{t('createNew')}</span>
+            </button>
+          )}
         </div>
 
         <div className={styles.permissionsCard}>
@@ -154,6 +160,7 @@ export default function PermissionsPage() {
                 <thead>
                   <tr>
                     <th>{t('name')}</th>
+                    <th>Módulo</th>
                     <th>{t('description')}</th>
                     <th>{tCommon('actions')}</th>
                   </tr>
@@ -162,25 +169,34 @@ export default function PermissionsPage() {
                   {permissions.map((permission) => (
                     <tr key={permission.id}>
                       <td className={styles.permissionName}>{permission.name}</td>
+                      <td>
+                        {permission.module ? (
+                          <span className={styles.moduleBadge}>{permission.module}</span>
+                        ) : '-'}
+                      </td>
                       <td className={styles.permissionDescription}>
                         {permission.description || '-'}
                       </td>
                       <td>
                         <div className={styles.actions}>
-                          <button
-                            className={`${styles.actionButton} ${styles.editButton}`}
-                            onClick={() => handleEdit(permission)}
-                            title={tCommon('edit')}
-                          >
-                            <Pencil size={16} />
-                          </button>
-                          <button
-                            className={`${styles.actionButton} ${styles.deleteButton}`}
-                            onClick={() => handleDelete(permission.id)}
-                            title={tCommon('delete')}
-                          >
-                            <Trash2 size={16} />
-                          </button>
+                          {hasPermission('UPDATE_PERMISSIONS') && (
+                            <button
+                              className={`${styles.actionButton} ${styles.editButton}`}
+                              onClick={() => handleEdit(permission)}
+                              title={tCommon('edit')}
+                            >
+                              <Pencil size={16} />
+                            </button>
+                          )}
+                          {hasPermission('DELETE_PERMISSIONS') && (
+                            <button
+                              className={`${styles.actionButton} ${styles.deleteButton}`}
+                              onClick={() => handleDelete(permission.id)}
+                              title={tCommon('delete')}
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -199,5 +215,6 @@ export default function PermissionsPage() {
         />
       </div>
     </DashboardLayout>
+    </PermissionGuard>
   );
 }

@@ -1,11 +1,17 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
+import { useLocale, useTranslations } from 'next-intl';
+import { usePathname } from 'next/navigation';
 import { chatService } from '../services/chat.service';
 import { ChatMessage } from '../types/chat.types';
+import { authService } from '@/modules/auth/services/auth.service';
 import styles from './ChatWidget.module.css';
 
 export const ChatWidget: React.FC = () => {
+  const t = useTranslations('chat');
+  const locale = useLocale();
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
@@ -37,9 +43,15 @@ export const ChatWidget: React.FC = () => {
     setIsLoading(true);
 
     try {
+      const token = authService.getToken();
+      const currentUser = authService.getCurrentUser();
+
       const response = await chatService.sendMessage({
         message: inputValue,
         thread_id: threadId,
+        auth_token: token ?? undefined,
+        user_context: currentUser ?? undefined,
+        current_page: pathname,
       });
 
       // Guardar el thread_id para mantener el contexto
@@ -59,7 +71,7 @@ export const ChatWidget: React.FC = () => {
       
       const errorMessage: ChatMessage = {
         role: 'agent',
-        content: 'Lo siento, ocurrió un error al procesar tu mensaje. Por favor, intenta de nuevo.',
+        content: t('errorMessage'),
         timestamp: new Date(),
       };
 
@@ -70,7 +82,7 @@ export const ChatWidget: React.FC = () => {
   };
 
   const formatTime = (date: Date) => {
-    return date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+    return date.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
   };
 
   return (
@@ -81,14 +93,14 @@ export const ChatWidget: React.FC = () => {
             <div className={styles.chatHeaderLeft}>
               <div className={styles.agentAvatar}>🤖</div>
               <div className={styles.chatHeaderTitle}>
-                <h3>Agente ProjectJ</h3>
-                <p>En línea</p>
+                <h3>{t('title')}</h3>
+                <p>{t('online')}</p>
               </div>
             </div>
             <button 
               className={styles.closeButton}
               onClick={() => setIsOpen(false)}
-              aria-label="Cerrar chat"
+              aria-label={t('close')}
             >
               ×
             </button>
@@ -97,8 +109,8 @@ export const ChatWidget: React.FC = () => {
           <div className={styles.chatMessages}>
             {messages.length === 0 ? (
               <div className={styles.welcomeMessage}>
-                <h4>¡Hola! 👋</h4>
-                <p>Soy el agente de ProjectJ. ¿En qué puedo ayudarte hoy?</p>
+                <h4>{t('welcomeTitle')}</h4>
+                <p>{t('welcomeDescription')}</p>
               </div>
             ) : (
               messages.map((message, index) => (
@@ -139,7 +151,7 @@ export const ChatWidget: React.FC = () => {
             <div className={styles.inputContainer}>
               <input
                 type="text"
-                placeholder="Escribe tu mensaje..."
+                placeholder={t('placeholder')}
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 disabled={isLoading}
@@ -149,7 +161,7 @@ export const ChatWidget: React.FC = () => {
                 type="submit" 
                 className={styles.sendButton}
                 disabled={isLoading || !inputValue.trim()}
-                aria-label="Enviar mensaje"
+                aria-label={t('send')}
               >
                 <svg 
                   viewBox="0 0 24 24" 
@@ -171,7 +183,7 @@ export const ChatWidget: React.FC = () => {
       <button 
         className={styles.chatButton}
         onClick={() => setIsOpen(!isOpen)}
-        aria-label={isOpen ? 'Cerrar chat' : 'Abrir chat'}
+        aria-label={isOpen ? t('close') : t('open')}
       >
         {isOpen ? '×' : '💬'}
       </button>

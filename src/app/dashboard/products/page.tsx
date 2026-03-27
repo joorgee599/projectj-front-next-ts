@@ -6,7 +6,6 @@ import Swal from 'sweetalert2';
 import { 
   Package, 
   Plus, 
-  Search, 
   Pencil, 
   Trash2, 
   Image as ImageIcon,
@@ -15,9 +14,11 @@ import {
   BarChart2
 } from 'lucide-react';
 import { DashboardLayout } from '@/core/design-system/DashboardLayout';
+import { PermissionGuard } from '@/core/auth/PermissionGuard';
+import { useAuth } from '@/core/auth/useAuth';
 import { ProductModal } from '@/modules/products/components/ProductModal';
 import { productService } from '@/modules/products/services/product.service';
-import { Product, ProductRequest } from '@/modules/products/types/product.types';
+import { Product, ProductSubmission } from '@/modules/products/types/product.types';
 import styles from './page.module.css';
 
 export default function ProductsPage() {
@@ -28,6 +29,7 @@ export default function ProductsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [updatingStatus, setUpdatingStatus] = useState<number | null>(null);
+  const { hasPermission } = useAuth();
 
   useEffect(() => {
     loadProducts();
@@ -61,7 +63,7 @@ export default function ProductsPage() {
     setIsModalOpen(true);
   };
 
-  const handleSubmit = async (productData: ProductRequest) => {
+  const handleSubmit = async (productData: ProductSubmission) => {
     try {
       if (selectedProduct) {
         // Actualizar
@@ -175,19 +177,24 @@ export default function ProductsPage() {
     }).format(price);
   };
 
-  const getStockClass = (stock: number) => {
+  const getStockClass = (product: Product) => {
+    const { stock, minStock, maxStock } = product;
     if (stock === 0) return styles.outOfStock;
-    if (stock < 10) return styles.lowStock;
+    if (maxStock != null && stock > maxStock) return styles.overStock;
+    if (minStock != null && stock <= minStock) return styles.lowStock;
     return styles.inStock;
   };
 
-  const getStockLabel = (stock: number) => {
+  const getStockLabel = (product: Product) => {
+    const { stock, minStock, maxStock } = product;
     if (stock === 0) return t('outOfStock');
-    if (stock < 10) return `${t('lowStock')} (${stock})`;
+    if (maxStock != null && stock > maxStock) return `${stock} ↑`;
+    if (minStock != null && stock <= minStock) return `${t('lowStock')} (${stock})`;
     return stock;
   };
 
   return (
+    <PermissionGuard permission="READ_PRODUCTS">
     <DashboardLayout>
       <div className={styles.productsPage}>
         <div className={styles.pageHeader}>
@@ -195,10 +202,12 @@ export default function ProductsPage() {
             <h1><Package size={28} className={styles.titleIcon} /> {t('title')}</h1>
             <p>{t('subtitle')}</p>
           </div>
-          <button className={styles.addButton} onClick={handleCreate}>
-            <Plus size={20} />
-            <span>{t('createNew')}</span>
-          </button>
+          {hasPermission('CREATE_PRODUCTS') && (
+            <button className={styles.addButton} onClick={handleCreate}>
+              <Plus size={20} />
+              <span>{t('createNew')}</span>
+            </button>
+          )}
         </div>
 
         <div className={styles.productsCard}>
@@ -210,9 +219,11 @@ export default function ProductsPage() {
             <div className={styles.emptyState}>
               <h3>{t('noData')}</h3>
               <p>{t('createFirst')}</p>
-              <button className={styles.addButton} onClick={handleCreate} style={{ marginTop: '1rem', margin: '0 auto' }}>
-                <Plus size={18} /> {t('createNew')}
-              </button>
+              {hasPermission('CREATE_PRODUCTS') && (
+                <button className={styles.addButton} onClick={handleCreate} style={{ marginTop: '1rem', margin: '0 auto' }}>
+                  <Plus size={18} /> {t('createNew')}
+                </button>
+              )}
             </div>
           ) : (
             <div className={styles.tableContainer}>
@@ -233,15 +244,26 @@ export default function ProductsPage() {
                   {products.map((product) => (
                     <tr key={product.id}>
                       <td>
-                        {product.image ? (
-                          <img
-                            src={product.image}
-                            alt={product.name}
-                            className={styles.productImage}
-                          />
+                        {product.image?.trim() ? (
+                          <div className={styles.imagePreview}>
+                            <img
+                              src={product.image}
+                              alt={product.name}
+                              className={styles.productImage}
+                              loading="lazy"
+                            />
+                            <div className={styles.imageZoom} aria-hidden="true">
+                              <img
+                                src={product.image}
+                                alt={product.name}
+                                className={styles.productImageLarge}
+                              />
+                            </div>
+                          </div>
                         ) : (
-                          <div className={styles.productImage}>
-                            <Package size={24} style={{ opacity: 0.5 }} />
+                          <div className={styles.imageFallback}>
+                            <Package size={20} />
+                            <span>{t('noImage')}</span>
                           </div>
                         )}
                       </td>
@@ -253,8 +275,8 @@ export default function ProductsPage() {
                       <td>{product.brandName || '-'}</td>
                       <td className={styles.price}>{formatPrice(product.price)}</td>
                       <td>
-                        <span className={`${styles.stock} ${getStockClass(product.stock)}`}>
-                          {getStockLabel(product.stock)}
+                        <span className={`${styles.stock} ${getStockClass(product)}`}>
+                          {getStockLabel(product)}
                         </span>
                       </td>
                       <td>
@@ -264,7 +286,7 @@ export default function ProductsPage() {
                               type="checkbox"
                               checked={product.status === 1}
                               onChange={() => handleStatusToggle(product.id, product.status)}
-                              disabled={updatingStatus === product.id}
+                              disabled={updatingStatus === product.id || !hasPermission('CHANGE_STATUS_PRODUCTS')}
                             />
                             <span className={styles.slider}></span>
                           </label>
@@ -279,20 +301,24 @@ export default function ProductsPage() {
                       </td>
                       <td>
                         <div className={styles.actions}>
-                          <button
-                            className={`${styles.actionButton} ${styles.editButton}`}
-                            onClick={() => handleEdit(product)}
-                            title={tCommon('edit')}
-                          >
-                            <Pencil size={16} />
-                          </button>
-                          <button
-                            className={`${styles.actionButton} ${styles.deleteButton}`}
-                            onClick={() => handleDelete(product.id)}
-                            title={tCommon('delete')}
-                          >
-                            <Trash2 size={16} />
-                          </button>
+                          {hasPermission('UPDATE_PRODUCTS') && (
+                            <button
+                              className={`${styles.actionButton} ${styles.editButton}`}
+                              onClick={() => handleEdit(product)}
+                              title={tCommon('edit')}
+                            >
+                              <Pencil size={16} />
+                            </button>
+                          )}
+                          {hasPermission('DELETE_PRODUCTS') && (
+                            <button
+                              className={`${styles.actionButton} ${styles.deleteButton}`}
+                              onClick={() => handleDelete(product.id)}
+                              title={tCommon('delete')}
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -311,5 +337,6 @@ export default function ProductsPage() {
         />
       </div>
     </DashboardLayout>
+    </PermissionGuard>
   );
 }

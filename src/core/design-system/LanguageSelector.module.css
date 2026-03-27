@@ -4,7 +4,7 @@
 
 .languageButton {
   background: transparent;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-color);
   cursor: pointer;
   padding: 6px 12px;
   border-radius: 8px;
@@ -14,12 +14,16 @@
   transition: all 0.2s ease;
   font-size: 14px;
   font-weight: 500;
-  color: #374151;
+  color: var(--text-primary);
 }
 
 .languageButton:hover {
-  background-color: rgba(79, 70, 229, 0.05);
-  border-color: #4f46e5;
+  background-color: var(--primary-light);
+  border-color: var(--primary);
+}
+
+.triggerIcon {
+  color: var(--text-secondary);
 }
 
 .flag {
@@ -34,8 +38,7 @@
 }
 
 .arrow {
-  font-size: 10px;
-  color: #9ca3af;
+  color: var(--text-secondary);
   margin-left: 2px;
 }
 
@@ -53,8 +56,8 @@
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
-  background: white;
-  border: 1px solid #e5e7eb;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
   min-width: 180px;
@@ -81,21 +84,21 @@
   gap: 12px;
   padding: 12px 16px;
   border: none;
-  background: white;
+  background: var(--card-bg);
   cursor: pointer;
   transition: all 0.2s ease;
-  color: #374151;
+  color: var(--text-primary);
   font-size: 14px;
   text-align: left;
 }
 
 .languageOption:hover {
-  background-color: #f9fafb;
+  background-color: var(--hover-bg);
 }
 
 .languageOption.active {
-  background-color: rgba(79, 70, 229, 0.05);
-  color: #4f46e5;
+  background-color: var(--primary-light);
+  color: var(--primary);
   font-weight: 600;
 }
 
@@ -110,36 +113,5 @@
 }
 
 .checkmark {
-  color: #4f46e5;
-  font-weight: bold;
-}
-
-/* Dark mode styles */
-:global(.dark) .languageButton {
-  border-color: #374151;
-  color: #e5e7eb;
-}
-
-:global(.dark) .languageButton:hover {
-  background-color: rgba(79, 70, 229, 0.2);
-  border-color: #6366f1;
-}
-
-:global(.dark) .dropdown {
-  background: #1f2937;
-  border-color: #374151;
-}
-
-:global(.dark) .languageOption {
-  background: #1f2937;
-  color: #e5e7eb;
-}
-
-:global(.dark) .languageOption:hover {
-  background-color: #374151;
-}
-
-:global(.dark) .languageOption.active {
-  background-color: rgba(79, 70, 229, 0.2);
-  color: #818cf8;
+  color: var(--primary);
 }

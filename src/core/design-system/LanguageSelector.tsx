@@ -1,14 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
+import { Check, ChevronDown, ChevronUp, Languages } from 'lucide-react';
 import styles from './LanguageSelector.module.css';
 
 export const LanguageSelector = () => {
   const [isOpen, setIsOpen] = useState(false);
   const locale = useLocale();
-  const router = useRouter();
+  const t = useTranslations('navbar');
 
   const languages = [
     { code: 'es', name: 'Español', flag: '🇪🇸' },
@@ -30,11 +30,13 @@ export const LanguageSelector = () => {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={styles.languageButton}
-        aria-label="Select language"
+        aria-label={t('language')}
+        title={t('language')}
       >
+        <Languages size={16} className={styles.triggerIcon} />
         <span className={styles.flag}>{currentLanguage.flag}</span>
         <span className={styles.code}>{currentLanguage.code.toUpperCase()}</span>
-        <span className={styles.arrow}>{isOpen ? '▲' : '▼'}</span>
+        {isOpen ? <ChevronUp size={14} className={styles.arrow} /> : <ChevronDown size={14} className={styles.arrow} />}
       </button>
 
       {isOpen && (
@@ -55,7 +57,7 @@ export const LanguageSelector = () => {
                 <span className={styles.optionFlag}>{language.flag}</span>
                 <span className={styles.optionName}>{language.name}</span>
                 {language.code === locale && (
-                  <span className={styles.checkmark}>✓</span>
+                  <Check size={16} className={styles.checkmark} />
                 )}
               </button>
             ))}

@@ -12,20 +12,22 @@ import {
   Shield, 
   Calendar 
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { DashboardLayout } from '@/core/design-system/DashboardLayout';
-import { UserModal } from '@/modules/users/components/UserModal';
+import { PermissionGuard } from '@/core/auth/PermissionGuard';
+import { useAuth } from '@/core/auth/useAuth';
 import { userService } from '@/modules/users/services/user.service';
-import { User, UserRequest } from '@/modules/users/types/user.types';
+import { User } from '@/modules/users/types/user.types';
 import styles from './page.module.css';
 
 export default function UsersPage() {
+  const router = useRouter();
   const t = useTranslations('users');
   const tCommon = useTranslations('common');
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [updatingStatus, setUpdatingStatus] = useState<number | null>(null);
+  const { hasPermission } = useAuth();
 
   useEffect(() => {
     loadUsers();
@@ -50,47 +52,11 @@ export default function UsersPage() {
   };
 
   const handleCreate = () => {
-    setSelectedUser(null);
-    setIsModalOpen(true);
+    router.push('/dashboard/users/create');
   };
 
   const handleEdit = (user: User) => {
-    setSelectedUser(user);
-    setIsModalOpen(true);
-  };
-
-  const handleSubmit = async (userData: UserRequest) => {
-    try {
-      if (selectedUser) {
-        await userService.update(selectedUser.id, userData);
-        Swal.fire({
-          title: t('updated'),
-          text: t('updatedSuccess'),
-          icon: 'success',
-          confirmButtonColor: '#4f46e5',
-          timer: 2000
-        });
-      } else {
-        await userService.create(userData);
-        Swal.fire({
-          title: t('created'),
-          text: t('createdSuccess'),
-          icon: 'success',
-          confirmButtonColor: '#4f46e5',
-          timer: 2000
-        });
-      }
-      setIsModalOpen(false);
-      await loadUsers();
-    } catch (error) {
-      console.error('Error saving user:', error);
-      Swal.fire({
-        title: tCommon('error'),
-        text: t('errorSaving'),
-        icon: 'error',
-        confirmButtonColor: '#4f46e5'
-      });
-    }
+    router.push(`/dashboard/users/edit/${user.id}`);
   };
 
   const handleDelete = async (id: number) => {
@@ -170,11 +136,13 @@ export default function UsersPage() {
     });
   };
 
-  const getRoleName = (user: User) => {
-    return user.roleName || '-';
+  const getRoleNames = (user: User) => {
+    if (!user.roleNames || user.roleNames.length === 0) return '-';
+    return user.roleNames.join(', ');
   };
 
   return (
+    <PermissionGuard permission="READ_USERS">
     <DashboardLayout>
       <div className={styles.usersPage}>
         <div className={styles.pageHeader}>
@@ -182,10 +150,12 @@ export default function UsersPage() {
             <h1><Users size={28} className={styles.titleIcon} /> {t('title')}</h1>
             <p>{t('subtitle')}</p>
           </div>
-          <button className={styles.addButton} onClick={handleCreate}>
-            <Plus size={20} />
-            <span>{t('createNew')}</span>
-          </button>
+          {hasPermission('CREATE_USERS') && (
+            <button className={styles.addButton} onClick={handleCreate}>
+              <Plus size={20} />
+              <span>{t('createNew')}</span>
+            </button>
+          )}
         </div>
 
         <div className={styles.usersCard}>
@@ -197,9 +167,11 @@ export default function UsersPage() {
             <div className={styles.emptyState}>
               <Users size={48} style={{ opacity: 0.2, marginBottom: '1rem' }} />
               <h3>{t('noData')}</h3>
-              <button className={styles.addButton} onClick={handleCreate} style={{ marginTop: '1rem', margin: '0 auto' }}>
-                <Plus size={18} /> {t('createFirst')}
-              </button>
+              {hasPermission('CREATE_USERS') && (
+                <button className={styles.addButton} onClick={handleCreate} style={{ marginTop: '1rem', margin: '0 auto' }}>
+                  <Plus size={18} /> {t('createFirst')}
+                </button>
+              )}
             </div>
           ) : (
             <div className={styles.tableContainer}>
@@ -222,7 +194,7 @@ export default function UsersPage() {
                       <td className={styles.userName}>{user.name}</td>
                       <td className={styles.email}>{user.email}</td>
                       <td>
-                        <span className={styles.role}>{getRoleName(user)}</span>
+                        <span className={styles.role}>{getRoleNames(user)}</span>
                       </td>
                       <td>
                         <div className={styles.statusCell}>
@@ -231,7 +203,7 @@ export default function UsersPage() {
                               type="checkbox"
                               checked={user.status === 1}
                               onChange={() => handleStatusToggle(user.id, user.status)}
-                              disabled={updatingStatus === user.id}
+                              disabled={updatingStatus === user.id || !hasPermission('CHANGE_STATUS_USERS')}
                             />
                             <span className={styles.slider}></span>
                           </label>
@@ -247,20 +219,24 @@ export default function UsersPage() {
                       <td className={styles.date}>{formatDate(user.createdAt)}</td>
                       <td>
                         <div className={styles.actions}>
-                          <button
-                            className={`${styles.actionButton} ${styles.editButton}`}
-                            onClick={() => handleEdit(user)}
-                            title={tCommon('edit')}
-                          >
-                            <Pencil size={16} />
-                          </button>
-                          <button
-                            className={`${styles.actionButton} ${styles.deleteButton}`}
-                            onClick={() => handleDelete(user.id)}
-                            title={tCommon('delete')}
-                          >
-                            <Trash2 size={16} />
-                          </button>
+                          {hasPermission('UPDATE_USERS') && (
+                            <button
+                              className={`${styles.actionButton} ${styles.editButton}`}
+                              onClick={() => handleEdit(user)}
+                              title={tCommon('edit')}
+                            >
+                              <Pencil size={16} />
+                            </button>
+                          )}
+                          {hasPermission('DELETE_USERS') && (
+                            <button
+                              className={`${styles.actionButton} ${styles.deleteButton}`}
+                              onClick={() => handleDelete(user.id)}
+                              title={tCommon('delete')}
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -270,14 +246,8 @@ export default function UsersPage() {
             </div>
           )}
         </div>
-
-        <UserModal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          onSubmit={handleSubmit}
-          user={selectedUser}
-        />
       </div>
     </DashboardLayout>
+    </PermissionGuard>
   );
 }

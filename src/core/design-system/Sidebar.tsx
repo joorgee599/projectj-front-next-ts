@@ -21,7 +21,10 @@ import {
   Plug, 
   Lock,
   ChevronRight,
-  ChevronDown
+  ChevronDown,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Warehouse
 } from 'lucide-react';
 import styles from './Sidebar.module.css';
 
@@ -30,6 +33,8 @@ interface NavItem {
   icon: React.ReactNode;
   href: string;
   badge?: string;
+  /** If set, the item is only visible when the user has this permission */
+  requiredPermission?: string;
   subItems?: NavItem[];
 }
 
@@ -44,19 +49,30 @@ interface SidebarProps {
   isMobileOpen?: boolean;
   userName?: string;
   userRole?: string;
+  /** Full list of permission strings from the logged-in user */
+  userPermissions?: string[];
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
   isCollapsed,
   onToggle,
   isMobileOpen = false,
-  userName = 'Usuario',
-  userRole = 'Administrador',
+  userName,
+  userRole,
+  userPermissions = [],
 }) => {
   const pathname = usePathname();
   const t = useTranslations('sidebar');
   const tCommon = useTranslations('common');
+  const finalUserName = userName || tCommon('user');
+  const finalUserRole = userRole || tCommon('administrator');
   const [expandedItems, setExpandedItems] = React.useState<Set<string>>(new Set());
+
+  /** Returns true if the user can see this nav item */
+  const canSee = (item: NavItem): boolean => {
+    if (!item.requiredPermission) return true;
+    return userPermissions.includes(item.requiredPermission);
+  };
 
   const navSections: NavSection[] = [
     {
@@ -74,25 +90,37 @@ export const Sidebar: React.FC<SidebarProps> = ({
           label: t('productManagement'), 
           icon: <Package size={20} />, 
           href: '/dashboard/products',
+          requiredPermission: 'READ_PRODUCTS',
           subItems: [
-            { label: t('products'), icon: <Package size={18} />, href: '/dashboard/products', badge: '12' },
-            { label: t('categories'), icon: <Tags size={18} />, href: '/dashboard/categories' },
-            { label: t('brands'), icon: <Factory size={18} />, href: '/dashboard/brands' },
+            { label: t('products'), icon: <Package size={18} />, href: '/dashboard/products', badge: '12', requiredPermission: 'READ_PRODUCTS' },
+            { label: t('categories'), icon: <Tags size={18} />, href: '/dashboard/categories', requiredPermission: 'READ_CATEGORIES' },
+            { label: t('brands'), icon: <Factory size={18} />, href: '/dashboard/brands', requiredPermission: 'READ_BRANDS' },
+            { label: t('providers'), icon: <Truck size={18} />, href: '/dashboard/providers', requiredPermission: 'READ_PROVIDERS' },
+            { label: t('inventory'), icon: <Warehouse size={18} />, href: '/dashboard/inventory', requiredPermission: 'READ_INVENTORY' },
           ]
         },
-        { label: t('providers'), icon: <Truck size={20} />, href: '/dashboard/providers' },
         { 
           label: t('userManagement'), 
           icon: <Users size={20} />, 
           href: '/dashboard/users',
+          requiredPermission: 'READ_USERS',
           subItems: [
-            { label: t('users'), icon: <User size={18} />, href: '/dashboard/users' },
-            { label: t('roles'), icon: <Shield size={18} />, href: '/dashboard/roles' },
-            { label: t('permissions'), icon: <Key size={18} />, href: '/dashboard/permissions' },
-            { label: t('clients'), icon: <UserPlus size={18} />, href: '/dashboard/clients' },
+            { label: t('users'), icon: <User size={18} />, href: '/dashboard/users', requiredPermission: 'READ_USERS' },
+            { label: t('roles'), icon: <Shield size={18} />, href: '/dashboard/roles', requiredPermission: 'READ_ROLES' },
+            { label: t('permissions'), icon: <Key size={18} />, href: '/dashboard/permissions', requiredPermission: 'READ_PERMISSIONS' },
+            { label: t('clients'), icon: <UserPlus size={18} />, href: '/dashboard/clients', requiredPermission: 'READ_CLIENTS' },
           ]
         },
-        { label: t('orders'), icon: <ShoppingCart size={20} />, href: '/dashboard/orders', badge: '3' },
+        {
+          label: t('salesManagement'),
+          icon: <ShoppingCart size={20} />,
+          href: '/dashboard/orders',
+          requiredPermission: 'READ_SALES',
+          subItems: [
+            { label: t('orders'), icon: <ShoppingCart size={18} />, href: '/dashboard/orders', badge: '3', requiredPermission: 'READ_SALES' },
+            { label: t('myCart'), icon: <ShoppingCart size={18} />, href: '/dashboard/cart' },
+          ]
+        },
       ],
     },
     {
@@ -138,14 +166,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       <nav className={styles.sidebarNav}>
-        {navSections.map((section) => (
+        {navSections.map((section) => {
+          const visibleItems = section.items.filter(canSee);
+          if (visibleItems.length === 0) return null;
+          return (
           <div key={section.title} className={styles.navSection}>
             <div className={styles.navTitle}>{section.title}</div>
-            {section.items.map((item) => {
+            {visibleItems.map((item) => {
               const isActive = pathname === item.href;
               const isExpanded = expandedItems.has(item.label);
               const hasSubItems = item.subItems && item.subItems.length > 0;
-              const isSubItemActive = hasSubItems && item.subItems.some(sub => pathname === sub.href);
+              const visibleSubItems = hasSubItems ? item.subItems!.filter(canSee) : [];
+              const isSubItemActive = visibleSubItems.some(sub => pathname === sub.href);
 
               return (
                 <div key={item.label} className={styles.navItemWrapper}>
@@ -158,11 +190,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       >
                         <span className={styles.navIcon}>{item.icon}</span>
                         <span className={styles.navText}>{item.label}</span>
-                        <span className={styles.expandIcon}>{isExpanded ? '▼' : '▶'}</span>
+                        <span className={styles.expandIcon}>{isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}</span>
                       </div>
                       {isExpanded && !isCollapsed && (
                         <div className={styles.subItems}>
-                          {item.subItems.map((subItem) => {
+                          {visibleSubItems.map((subItem) => {
                             const isSubActive = pathname === subItem.href;
                             return (
                               <Link
@@ -179,10 +211,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         </div>
                       )}
                       {/* Popup menu for collapsed sidebar */}
-                      {isCollapsed && hasSubItems && (
+                      {isCollapsed && visibleSubItems.length > 0 && (
                         <div className={styles.popupMenu}>
                           <div className={styles.popupHeader}>{item.label}</div>
-                          {item.subItems.map((subItem) => {
+                          {visibleSubItems.map((subItem) => {
                             const isSubActive = pathname === subItem.href;
                             return (
                               <Link
@@ -213,17 +245,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
               );
             })}
           </div>
-        ))}
+          );
+        })}
       </nav>
 
       <div className={styles.sidebarFooter}>
         <div className={styles.userCard}>
           <div className={styles.userAvatar}>
-            {userName.charAt(0).toUpperCase()}
+            {finalUserName.charAt(0).toUpperCase()}
           </div>
           <div className={styles.userInfo}>
-            <div className={styles.userName}>{userName}</div>
-            <div className={styles.userRole}>{userRole}</div>
+            <div className={styles.userName}>{finalUserName}</div>
+            <div className={styles.userRole}>{finalUserRole}</div>
           </div>
         </div>
       </div>
@@ -231,9 +264,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <button 
         className={styles.toggleButton}
         onClick={onToggle}
-        aria-label={isCollapsed ? 'Expandir sidebar' : 'Colapsar sidebar'}
+        aria-label={isCollapsed ? tCommon('expand') : tCommon('collapse')}
       >
-        {isCollapsed ? '→' : '←'}
+        {isCollapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
       </button>
     </aside>
   );

@@ -13,6 +13,8 @@ import {
   Calendar
 } from 'lucide-react';
 import { DashboardLayout } from '@/core/design-system/DashboardLayout';
+import { PermissionGuard } from '@/core/auth/PermissionGuard';
+import { useAuth } from '@/core/auth/useAuth';
 import { BrandModal } from '@/modules/brands/components/BrandModal';
 import { brandService } from '@/modules/brands/services/brand.service';
 import { Brand, BrandRequest } from '@/modules/brands/types/brand.types';
@@ -26,6 +28,7 @@ export default function BrandsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedBrand, setSelectedBrand] = useState<Brand | null>(null);
   const [updatingStatus, setUpdatingStatus] = useState<number | null>(null);
+  const { hasPermission } = useAuth();
 
   useEffect(() => {
     loadBrands();
@@ -171,6 +174,7 @@ export default function BrandsPage() {
   };
 
   return (
+    <PermissionGuard permission="READ_BRANDS">
     <DashboardLayout>
       <div className={styles.brandsPage}>
         <div className={styles.pageHeader}>
@@ -178,10 +182,12 @@ export default function BrandsPage() {
             <h1><Factory size={28} className={styles.titleIcon} /> {t('title')}</h1>
             <p>{t('subtitle')}</p>
           </div>
-          <button className={styles.addButton} onClick={handleCreate}>
-            <Plus size={20} />
-            <span>{t('createNew')}</span>
-          </button>
+          {hasPermission('CREATE_BRANDS') && (
+            <button className={styles.addButton} onClick={handleCreate}>
+              <Plus size={20} />
+              <span>{t('createNew')}</span>
+            </button>
+          )}
         </div>
 
         <div className={styles.brandsCard}>
@@ -193,9 +199,11 @@ export default function BrandsPage() {
             <div className={styles.emptyState}>
               <Factory size={48} style={{ opacity: 0.2, marginBottom: '1rem' }} />
               <h3>{t('noData')}</h3>
-              <button className={styles.addButton} onClick={handleCreate} style={{ marginTop: '1rem', margin: '0 auto' }}>
-                <Plus size={18} /> {t('createFirst')}
-              </button>
+              {hasPermission('CREATE_BRANDS') && (
+                <button className={styles.addButton} onClick={handleCreate} style={{ marginTop: '1rem', margin: '0 auto' }}>
+                  <Plus size={18} /> {t('createFirst')}
+                </button>
+              )}
             </div>
           ) : (
             <div className={styles.tableContainer}>
@@ -225,7 +233,7 @@ export default function BrandsPage() {
                               type="checkbox"
                               checked={brand.status === 1}
                               onChange={() => handleStatusToggle(brand.id, brand.status)}
-                              disabled={updatingStatus === brand.id}
+                              disabled={updatingStatus === brand.id || !hasPermission('CHANGE_STATUS_BRANDS')}
                             />
                             <span className={styles.slider}></span>
                           </label>
@@ -241,20 +249,24 @@ export default function BrandsPage() {
                       <td className={styles.date}>{formatDate(brand.createdAt)}</td>
                       <td>
                         <div className={styles.actions}>
-                          <button
-                            className={`${styles.actionButton} ${styles.editButton}`}
-                            onClick={() => handleEdit(brand)}
-                            title={tCommon('edit')}
-                          >
-                            <Pencil size={16} />
-                          </button>
-                          <button
-                            className={`${styles.actionButton} ${styles.deleteButton}`}
-                            onClick={() => handleDelete(brand.id)}
-                            title={tCommon('delete')}
-                          >
-                            <Trash2 size={16} />
-                          </button>
+                          {hasPermission('UPDATE_BRANDS') && (
+                            <button
+                              className={`${styles.actionButton} ${styles.editButton}`}
+                              onClick={() => handleEdit(brand)}
+                              title={tCommon('edit')}
+                            >
+                              <Pencil size={16} />
+                            </button>
+                          )}
+                          {hasPermission('DELETE_BRANDS') && (
+                            <button
+                              className={`${styles.actionButton} ${styles.deleteButton}`}
+                              onClick={() => handleDelete(brand.id)}
+                              title={tCommon('delete')}
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -273,5 +285,6 @@ export default function BrandsPage() {
         />
       </div>
     </DashboardLayout>
+    </PermissionGuard>
   );
 }

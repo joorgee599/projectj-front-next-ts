@@ -12,6 +12,8 @@ import {
   Mail
 } from 'lucide-react';
 import { DashboardLayout } from '@/core/design-system/DashboardLayout';
+import { PermissionGuard } from '@/core/auth/PermissionGuard';
+import { useAuth } from '@/core/auth/useAuth';
 import { ProviderModal } from '@/modules/providers/components/ProviderModal';
 import { providerService } from '@/modules/providers/services/provider.service';
 import { Provider, ProviderRequest } from '@/modules/providers/types/provider.types';
@@ -25,6 +27,7 @@ export default function ProvidersPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProvider, setSelectedProvider] = useState<Provider | null>(null);
   const [updatingStatus, setUpdatingStatus] = useState<number | null>(null);
+  const { hasPermission } = useAuth();
 
   useEffect(() => {
     loadProviders();
@@ -170,6 +173,7 @@ export default function ProvidersPage() {
   };
 
   return (
+    <PermissionGuard permission="READ_PROVIDERS">
     <DashboardLayout>
       <div className={styles.providersPage}>
         <div className={styles.pageHeader}>
@@ -177,10 +181,12 @@ export default function ProvidersPage() {
             <h1><Truck size={28} className={styles.titleIcon} /> {t('title')}</h1>
             <p>{t('subtitle')}</p>
           </div>
-          <button className={styles.addButton} onClick={handleCreate}>
-            <Plus size={20} />
-            <span>{t('createNew')}</span>
-          </button>
+          {hasPermission('CREATE_PROVIDERS') && (
+            <button className={styles.addButton} onClick={handleCreate}>
+              <Plus size={20} />
+              <span>{t('createNew')}</span>
+            </button>
+          )}
         </div>
 
         <div className={styles.providersCard}>
@@ -192,9 +198,11 @@ export default function ProvidersPage() {
             <div className={styles.emptyState}>
               <Truck size={48} style={{ opacity: 0.2, marginBottom: '1rem' }} />
               <h3>{t('noData')}</h3>
-              <button className={styles.addButton} onClick={handleCreate} style={{ marginTop: '1rem', margin: '0 auto' }}>
-                <Plus size={18} /> {t('createFirst')}
-              </button>
+              {hasPermission('CREATE_PROVIDERS') && (
+                <button className={styles.addButton} onClick={handleCreate} style={{ marginTop: '1rem', margin: '0 auto' }}>
+                  <Plus size={18} /> {t('createFirst')}
+                </button>
+              )}
             </div>
           ) : (
             <div className={styles.tableContainer}>
@@ -222,7 +230,7 @@ export default function ProvidersPage() {
                               type="checkbox"
                               checked={provider.status === 1}
                               onChange={() => handleStatusToggle(provider.id, provider.status)}
-                              disabled={updatingStatus === provider.id}
+                              disabled={updatingStatus === provider.id || !hasPermission('CHANGE_STATUS_PROVIDERS')}
                             />
                             <span className={styles.slider}></span>
                           </label>
@@ -238,20 +246,24 @@ export default function ProvidersPage() {
                       <td className={styles.date}>{formatDate(provider.createdAt)}</td>
                       <td>
                         <div className={styles.actions}>
-                          <button
-                            className={`${styles.actionButton} ${styles.editButton}`}
-                            onClick={() => handleEdit(provider)}
-                            title={tCommon('edit')}
-                          >
-                            <Pencil size={16} />
-                          </button>
-                          <button
-                            className={`${styles.actionButton} ${styles.deleteButton}`}
-                            onClick={() => handleDelete(provider.id)}
-                            title={tCommon('delete')}
-                          >
-                            <Trash2 size={16} />
-                          </button>
+                          {hasPermission('UPDATE_PROVIDERS') && (
+                            <button
+                              className={`${styles.actionButton} ${styles.editButton}`}
+                              onClick={() => handleEdit(provider)}
+                              title={tCommon('edit')}
+                            >
+                              <Pencil size={16} />
+                            </button>
+                          )}
+                          {hasPermission('DELETE_PROVIDERS') && (
+                            <button
+                              className={`${styles.actionButton} ${styles.deleteButton}`}
+                              onClick={() => handleDelete(provider.id)}
+                              title={tCommon('delete')}
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -270,5 +282,6 @@ export default function ProvidersPage() {
         />
       </div>
     </DashboardLayout>
+    </PermissionGuard>
   );
 }

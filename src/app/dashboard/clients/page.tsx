@@ -13,6 +13,8 @@ import {
   Phone 
 } from 'lucide-react';
 import { DashboardLayout } from '@/core/design-system/DashboardLayout';
+import { PermissionGuard } from '@/core/auth/PermissionGuard';
+import { useAuth } from '@/core/auth/useAuth';
 import { ClientModal } from '@/modules/clients/components/ClientModal';
 import { clientService } from '@/modules/clients/services/client.service';
 import { Client, ClientRequest } from '@/modules/clients/types/client.types';
@@ -26,6 +28,7 @@ export default function ClientsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [updatingStatus, setUpdatingStatus] = useState<number | null>(null);
+  const { hasPermission } = useAuth();
 
   useEffect(() => {
     loadClients();
@@ -160,6 +163,7 @@ export default function ClientsPage() {
   };
 
   return (
+    <PermissionGuard permission="READ_CLIENTS">
     <DashboardLayout>
       <div className={styles.clientsPage}>
         <div className={styles.pageHeader}>
@@ -167,10 +171,12 @@ export default function ClientsPage() {
             <h1><UserCheck size={28} className={styles.titleIcon} /> {t('title')}</h1>
             <p>{t('subtitle')}</p>
           </div>
-          <button className={styles.addButton} onClick={handleCreate}>
-            <Plus size={20} />
-            <span>{t('createNew')}</span>
-          </button>
+          {hasPermission('CREATE_CLIENTS') && (
+            <button className={styles.addButton} onClick={handleCreate}>
+              <Plus size={20} />
+              <span>{t('createNew')}</span>
+            </button>
+          )}
         </div>
 
         <div className={styles.clientsCard}>
@@ -182,9 +188,11 @@ export default function ClientsPage() {
             <div className={styles.emptyState}>
               <UserCheck size={48} style={{ opacity: 0.2, marginBottom: '1rem' }} />
               <h3>{t('noData')}</h3>
-              <button className={styles.addButton} onClick={handleCreate} style={{ marginTop: '1rem', margin: '0 auto' }}>
-                <Plus size={18} /> {t('createFirst')}
-              </button>
+              {hasPermission('CREATE_CLIENTS') && (
+                <button className={styles.addButton} onClick={handleCreate} style={{ marginTop: '1rem', margin: '0 auto' }}>
+                  <Plus size={18} /> {t('createFirst')}
+                </button>
+              )}
             </div>
           ) : (
             <div className={styles.tableContainer}>
@@ -215,7 +223,7 @@ export default function ClientsPage() {
                               type="checkbox"
                               checked={client.status === 1}
                               onChange={() => handleStatusToggle(client)}
-                              disabled={updatingStatus === client.id}
+                              disabled={updatingStatus === client.id || !hasPermission('CHANGE_STATUS_CLIENTS')}
                             />
                             <span className={styles.slider}></span>
                           </label>
@@ -230,20 +238,24 @@ export default function ClientsPage() {
                       </td>
                       <td>
                         <div className={styles.actions}>
-                          <button
-                            className={`${styles.actionButton} ${styles.editButton}`}
-                            onClick={() => handleEdit(client)}
-                            title={tCommon('edit')}
-                          >
-                            <Pencil size={16} />
-                          </button>
-                          <button
-                            className={`${styles.actionButton} ${styles.deleteButton}`}
-                            onClick={() => handleDelete(client.id)}
-                            title={tCommon('delete')}
-                          >
-                            <Trash2 size={16} />
-                          </button>
+                          {hasPermission('UPDATE_CLIENTS') && (
+                            <button
+                              className={`${styles.actionButton} ${styles.editButton}`}
+                              onClick={() => handleEdit(client)}
+                              title={tCommon('edit')}
+                            >
+                              <Pencil size={16} />
+                            </button>
+                          )}
+                          {hasPermission('DELETE_CLIENTS') && (
+                            <button
+                              className={`${styles.actionButton} ${styles.deleteButton}`}
+                              onClick={() => handleDelete(client.id)}
+                              title={tCommon('delete')}
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -262,5 +274,6 @@ export default function ClientsPage() {
         />
       </div>
     </DashboardLayout>
+    </PermissionGuard>
   );
 }

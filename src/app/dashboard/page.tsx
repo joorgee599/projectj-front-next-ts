@@ -3,7 +3,6 @@
 import React from 'react';
 import { useTranslations } from 'next-intl';
 import { DashboardLayout } from '@/core/design-system/DashboardLayout';
-import { ChatWidget } from '@/modules/chat/components/ChatWidget';
 import styles from './page.module.css';
 
 export default function DashboardPage() {
@@ -123,9 +122,6 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
-
-        {/* Chat Widget flotante */}
-        <ChatWidget />
       </div>
     </DashboardLayout>
   );
